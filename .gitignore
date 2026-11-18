@@ -1,0 +1,8 @@
+*.exe
+*.fm
+*.zip
+*.test
+pauscout_test_linux
+.DS_Store
+.go-cache/
+.research/
