@@ -38,6 +38,8 @@ body:has(.profile-dialog[open]){overflow:hidden}
 .profile-head .pos{overflow-wrap:anywhere}
 .profile-close{flex:none;width:40px;height:40px;padding:0;font-size:25px;line-height:1}
 .profile-feedback{flex:none;margin:10px 20px 0}
+.build-warning{padding:10px 12px;margin:12px 0 0;border:1px solid #80673b;border-radius:9px;background:#31291c;color:#f6dfac;font-size:13px}
+.profile-dialog .build-warning{flex:none;margin:10px 20px 0}
 .profile-scroll{min-height:0;overflow:auto;overscroll-behavior:contain;padding:0 22px 18px}
 .profile-scroll .attr-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 .profile-scroll .compare-box{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:14px 0 0}
@@ -53,7 +55,7 @@ body:has(.profile-dialog[open]){overflow:hidden}
   .profile-head,.profile-dialog .editor-save{padding:12px}
   .profile-scroll{padding:0 12px 14px}
   .profile-scroll .attr-grid{grid-template-columns:1fr}
-  .profile-feedback{margin:8px 12px 0}
+  .profile-feedback,.profile-dialog .build-warning{margin:8px 12px 0}
 }
 </style>
 </head>
@@ -92,7 +94,7 @@ body:has(.profile-dialog[open]){overflow:hidden}
     <div class="field"><button id="exportEdits" class="btn">Exporter les modifications</button></div>
     <div class="note">La sélection et les modifications en attente restent dans ce navigateur. Le bouton Enregistrer les stats écrit dans la partie locale ouverte.</div>
   </section>
-  <div class="side-footer">PAUSCOUT v0.14.3 · Édition locale des joueurs et du staff · Non affilié à SEGA ou Sports Interactive.</div>
+  <div class="side-footer">PAUSCOUT v0.14.4 · Édition locale des joueurs et du staff · Non affilié à SEGA ou Sports Interactive.</div>
 </aside>
 <main class="main">
   <div class="topline"><div><div class="micro">FOOTBALL MANAGER 2027 / JOUEURS</div><h1 class="title">Explore et modifie <b>ta partie.</b></h1><p class="subtitle">Parcours les clubs, consulte les joueurs et enregistre leurs stats dans ta sauvegarde locale.</p></div><div class="top-actions"><div id="status" class="live">● Local et privé</div><button id="importTop" type="button" class="btn btn-primary">⇧ Importer pour consulter</button><button id="quit" class="btn btn-outline" style="padding:6px 10px">Quitter</button></div></div>
@@ -102,6 +104,7 @@ body:has(.profile-dialog[open]){overflow:hidden}
     <label for="localSave" class="small-muted" style="display:block;margin-bottom:6px">Sauvegarde à modifier</label>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><select id="localSave" style="flex:2;min-width:280px"><option value="">Recherche des sauvegardes…</option></select><button id="openLocal" class="btn btn-primary">Ouvrir cette partie</button><button id="saveEdits" class="btn btn-gold" disabled>Enregistrer les stats (0)</button></div>
     <p id="localPath" class="note" style="margin:10px 0 0;overflow-wrap:anywhere"></p>
+    <p id="saveBuildWarning" class="build-warning hidden" role="status"></p>
   </section>
   <details class="panel secondary-import" id="importZone" style="margin:12px 0 20px">
     <summary>Importer un fichier pour consultation (.fm, .zip, .csv ou .json)</summary>
@@ -126,6 +129,7 @@ body:has(.profile-dialog[open]){overflow:hidden}
     <button id="closeProfile" class="btn btn-outline profile-close" type="button" aria-label="Fermer la fiche" autofocus>×</button>
   </header>
   <div id="profileFeedback" class="toast profile-feedback" role="status"></div>
+  <p id="profileBuildWarning" class="build-warning hidden"></p>
   <div id="detail" class="profile-scroll"></div>
   <footer class="editor-save">
     <span id="profileChanges"></span>
@@ -538,9 +542,16 @@ $('exportEdits').addEventListener('click',()=>{let patches=Object.entries(change
 let lastSummary=null;
 function showSaveMetadata(data){
   lastSummary=data;
-  $('empty').innerHTML='<div style="font-size:30px">✅</div><h3>Sauvegarde FM27 reconnue</h3><p>Le résumé de la partie a été lu localement. Les joueurs identifiés sont affichés dans le tableau ; la couverture de la sauvegarde reste partielle.</p>';
+  const warning=data?.compatibility_warning||'';
+  for(const id of ['saveBuildWarning','profileBuildWarning']){
+    const banner=$(id);
+    banner.textContent=warning;
+    banner.classList.toggle('hidden',!warning);
+  }
+  if(data)$('empty').innerHTML=data.coverage
+    ?'<div style="font-size:30px">✅</div><h3>Sauvegarde FM reconnue</h3><p>Le tableau affiche les joueurs identifiés.</p>'
+    :'<h3>Catalogue indisponible</h3><p>Le résumé de la partie est lisible.</p>';
 }
-function hideSaveMetadata(){ lastSummary=null; }
 function parseCSV(text){let first=(text.replace(/^\uFEFF/,'').split(/\r?\n/)[0]||'');let delim=(first.match(/;/g)||[]).length>(first.match(/,/g)||[]).length?';':',';let rows=[],cell='',row=[],q=false;for(let i=0;i<text.length;i++){let ch=text[i];if(ch==='"'){if(q&&text[i+1]==='"'){cell+='"';i++}else q=!q}else if(ch===delim&&!q){row.push(cell);cell=''}else if((ch==='\n'||ch==='\r')&&!q){if(ch==='\r'&&text[i+1]==='\n')i++;row.push(cell);if(row.some(t=>t.trim()))rows.push(row);cell='';row=[]}else cell+=ch}row.push(cell);if(row.some(t=>t.trim()))rows.push(row);if(rows.length<2)throw Error('CSV vide.');let cols=rows.shift().map(canonical);return rows.map(r=>Object.fromEntries(cols.map((k,i)=>[k,r[i]??''])))}
 async function receive(file){
   if(!file)return;
@@ -555,14 +566,14 @@ async function receive(file){
       fmAttributeOrder=Array.isArray(dat.attribute_order)?dat.attribute_order:[];staffAttributeOrder=Array.isArray(dat.staff_attribute_order)?dat.staff_attribute_order:[];staffRoleOrder=Array.isArray(dat.staff_role_order)?dat.staff_role_order:[];
       
       $('genderFilter').value='';
-      hideSaveMetadata();
+      showSaveMetadata(null);
       setPlayers(Array.isArray(dat)?dat:(dat.players??dat.joueurs??[]),file.name,Array.isArray(dat.staff)?dat.staff:[]);
     }else if(name.endsWith('.csv')){
       configureCurrency(null,false);
       fmAttributeOrder=[];staffAttributeOrder=[];staffRoleOrder=[];
       
       $('genderFilter').value='';
-      hideSaveMetadata();
+      showSaveMetadata(null);
       setPlayers(parseCSV(await file.text()),file.name);
     }else if(name.endsWith('.fm')||name.endsWith('.zip')){
       if(location.protocol==='file:')throw Error('Pour lire un fichier FM, utilise PauScout_FM27.exe plutôt que index.html.');
@@ -580,7 +591,7 @@ async function receive(file){
       setPlayers(data.players||[],data.source||file.name,data.staff||[]);
       showSaveMetadata(data);
       if(data.coverage)notify(`${Number(data.coverage.men||0).toLocaleString('fr-FR')} hommes affichés par défaut. Choisis « Tous les joueurs » ou « Femmes » dans le filtre Genre pour changer la liste.`);
-      else notify('Sauvegarde FM27 reconnue. Cette version ne permet pas encore de lire les joueurs.');
+      else notify(data.note||'Catalogue des joueurs indisponible.',true);
     }else throw Error('Format inconnu : importe un .fm, .zip, .json ou .csv.');
   }catch(err){notify(String(err.message||err),true);$('status').textContent='● Erreur de lecture'}
   finally{$('status').classList.remove('spinning');$('file').value=''}
@@ -599,7 +610,7 @@ $('openLocal').addEventListener('click',async()=>{
   $('openLocal').disabled=true;$('status').textContent='● Ouverture de la sauvegarde…';
   try{
     const response=await fetch('/api/ouvrir-local',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({path})});
-    const data=await response.json();if(!response.ok)throw Error(data.error||'Ouverture impossible');
+    const data=await response.json();if(!response.ok)throw Error([data.error||'Ouverture impossible',data.compatibility_warning].filter(Boolean).join(' '));
     playerChanges={};staffChanges={};changes=currentMode==='staff'?staffChanges:playerChanges;persist();localToken=data.token;localOpenedPath=data.path;
     const summary=data.summary;configureCurrency(summary.euro_rate,true);fmAttributeOrder=summary.attribute_order||[];staffAttributeOrder=summary.staff_attribute_order||[];staffRoleOrder=summary.staff_role_order||[];$('genderFilter').value='male';
     setPlayers(summary.players||[],summary.source||path,summary.staff||[]);showSaveMetadata(summary);

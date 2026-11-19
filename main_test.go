@@ -24,13 +24,14 @@ func TestSaveCatalogEndpoints(t *testing.T) {
 		t.Fatal(err)
 	}
 	type catalogSummary struct {
-		Version  string                 `json:"version"`
-		GameDate string                 `json:"game_date"`
-		Coverage reader.CatalogCoverage `json:"coverage"`
+		Version              string                 `json:"version"`
+		CompatibilityWarning string                 `json:"compatibility_warning"`
+		GameDate             string                 `json:"game_date"`
+		Coverage             reader.CatalogCoverage `json:"coverage"`
 	}
 	check := func(t *testing.T, summary catalogSummary) {
 		t.Helper()
-		if summary.Version != want.GameVersion || summary.GameDate != want.GameDate || summary.Coverage.WithID == 0 {
+		if summary.Version != want.GameVersion || summary.CompatibilityWarning != want.CompatibilityWarning || summary.GameDate != want.GameDate || summary.Coverage.WithID == 0 {
 			t.Fatalf("catalogue inattendu : %+v", summary)
 		}
 	}

@@ -28,7 +28,7 @@ import (
 var website embed.FS
 
 const (
-	appVersion = "0.14.3"
+	appVersion = "0.14.4"
 	maxUpload  = 800 << 20
 	maxSave    = 1400 << 20
 )
@@ -146,13 +146,9 @@ func (a *api) openLocal(w http.ResponseWriter, r *http.Request) {
 		a.json(w, 422, map[string]string{"error": err.Error()})
 		return
 	}
-	if !reader.SupportsGameVersion(s.GameVersion) {
-		a.json(w, 422, map[string]string{"error": "Version FM27 non validée pour l'écriture : " + s.GameVersion})
-		return
-	}
 	catalog, err := reader.ReadPlayerCatalog(path)
 	if err != nil {
-		a.json(w, 422, map[string]string{"error": err.Error()})
+		a.json(w, 422, map[string]string{"error": err.Error(), "compatibility_warning": s.CompatibilityWarning})
 		return
 	}
 	var secret [24]byte
@@ -333,21 +329,24 @@ func (a *api) upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.File = name
-	if reader.SupportsGameVersion(s.GameVersion) {
-		catalog, catalogErr := reader.ReadPlayerCatalog(savePath)
-		if catalogErr != nil {
+	catalog, catalogErr := reader.ReadPlayerCatalog(savePath)
+	if catalogErr != nil {
+		if s.CompatibilityWarning == "" {
 			a.json(w, 422, map[string]string{"error": "Joueurs FM27 illisibles : " + catalogErr.Error()})
 			return
 		}
-		s.Players = catalog.Players
-		s.Staff = catalog.Staff
-		s.EuroRate = catalog.EuroRate
-		s.Coverage = &catalog.Coverage
-		s.AttributeOrder = reader.AttributeOrder()
-		s.StaffAttributeOrder = reader.StaffAttributeOrder()
-		s.StaffRoleOrder = reader.StaffRoleOrder()
-		s.Note = fmt.Sprintf("Liste partielle vérifiée : %d fiches liées à un ID (%d hommes, %d femmes), dont %d noms et %d clubs retrouvés, sur %d entrées annoncées. Le fichier n'a pas été modifié.", catalog.Coverage.WithID, catalog.Coverage.Men, catalog.Coverage.Women, catalog.Coverage.WithName, catalog.Coverage.WithClub, catalog.Coverage.Indexed)
+		s.Note = "Catalogue FM illisible : " + catalogErr.Error()
+		a.json(w, 200, s)
+		return
 	}
+	s.Players = catalog.Players
+	s.Staff = catalog.Staff
+	s.EuroRate = catalog.EuroRate
+	s.Coverage = &catalog.Coverage
+	s.AttributeOrder = reader.AttributeOrder()
+	s.StaffAttributeOrder = reader.StaffAttributeOrder()
+	s.StaffRoleOrder = reader.StaffRoleOrder()
+	s.Note = fmt.Sprintf("Liste partielle vérifiée : %d fiches liées à un ID (%d hommes, %d femmes), dont %d noms et %d clubs retrouvés, sur %d entrées annoncées. Le fichier n'a pas été modifié.", catalog.Coverage.WithID, catalog.Coverage.Men, catalog.Coverage.Women, catalog.Coverage.WithName, catalog.Coverage.WithClub, catalog.Coverage.Indexed)
 	a.json(w, 200, s)
 }
 

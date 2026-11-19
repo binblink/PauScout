@@ -22,19 +22,21 @@ const (
 	zstdMagic       = 0xfd2fb528
 	maxSectionBytes = 8 * 1024 * 1024 // metadata only
 	maxFrames       = 4096
+	lastTestedBuild = "27.1.0+2505117"
 )
 
-var versionRE = regexp.MustCompile(`\b(?:26|27)\.\d+\.\d+\+\d+\b`)
+var versionRE = regexp.MustCompile(`\b\d+\.\d+\.\d+\+\d+\b`)
 
-// SupportsGameVersion reports whether the build is supported for catalog
-// decoding and save editing. Read can also recognize other builds' metadata.
-func SupportsGameVersion(version string) bool {
+func compatibilityWarning(version string) string {
 	switch version {
-	case "27.0.1+2503222", "27.1.0+2505117":
-		return true
-	default:
-		return false
+	case "27.0.1+2503222", lastTestedBuild:
+		return ""
 	}
+	message := "Le build FM de cette sauvegarde reste inconnu."
+	if version != "" {
+		message = fmt.Sprintf("Le build FM %s n’a pas été testé avec PauScout.", version)
+	}
+	return message + " Le dernier build testé est le " + lastTestedBuild + ". La lecture ou l’écriture peut échouer. Utilise une copie de ta sauvegarde."
 }
 
 type Frame struct {
@@ -44,24 +46,25 @@ type Frame struct {
 }
 
 type Summary struct {
-	File                string           `json:"source"`
-	GameVersion         string           `json:"version"`
-	GameDate            string           `json:"game_date,omitempty"`
-	Manager             string           `json:"manager"`
-	Club                string           `json:"club"`
-	SaveTitle           string           `json:"save_title,omitempty"`
-	Names               []string         `json:"names"`
-	Frames              int              `json:"sections_count"`
-	Format              string           `json:"format"`
-	Bytes               int64            `json:"save_bytes"`
-	Note                string           `json:"note"`
-	Players             []CatalogPlayer  `json:"players"`
-	Staff               []CatalogStaff   `json:"staff,omitempty"`
-	Coverage            *CatalogCoverage `json:"coverage,omitempty"`
-	AttributeOrder      []string         `json:"attribute_order,omitempty"`
-	StaffAttributeOrder []string         `json:"staff_attribute_order,omitempty"`
-	StaffRoleOrder      []string         `json:"staff_role_order,omitempty"`
-	EuroRate            *float64         `json:"euro_rate,omitempty"`
+	File                 string           `json:"source"`
+	GameVersion          string           `json:"version"`
+	CompatibilityWarning string           `json:"compatibility_warning,omitempty"`
+	GameDate             string           `json:"game_date,omitempty"`
+	Manager              string           `json:"manager"`
+	Club                 string           `json:"club"`
+	SaveTitle            string           `json:"save_title,omitempty"`
+	Names                []string         `json:"names"`
+	Frames               int              `json:"sections_count"`
+	Format               string           `json:"format"`
+	Bytes                int64            `json:"save_bytes"`
+	Note                 string           `json:"note"`
+	Players              []CatalogPlayer  `json:"players"`
+	Staff                []CatalogStaff   `json:"staff,omitempty"`
+	Coverage             *CatalogCoverage `json:"coverage,omitempty"`
+	AttributeOrder       []string         `json:"attribute_order,omitempty"`
+	StaffAttributeOrder  []string         `json:"staff_attribute_order,omitempty"`
+	StaffRoleOrder       []string         `json:"staff_role_order,omitempty"`
+	EuroRate             *float64         `json:"euro_rate,omitempty"`
 }
 
 func parseLengthString(data []byte, at int) (s string, next int, ok bool) {
@@ -224,9 +227,6 @@ func Read(path string) (*Summary, error) {
 	if s.Frames < 3 {
 		return nil, errors.New("sections FMF manquantes")
 	}
-	if s.GameVersion == "" {
-		return nil, errors.New("version de jeu illisible dans le resume")
-	}
 	directory, err := ReadDirectory(path)
 	if err != nil {
 		return nil, fmt.Errorf("repertoire de sauvegarde: %w", err)
@@ -239,15 +239,22 @@ func Read(path string) (*Summary, error) {
 }
 
 func parseSaveSummary(s *Summary, b []byte) {
-	s.GameVersion = versionRE.FindString(string(b))
+	version, versionEnd, ok := summaryVersionField(b)
+	if !ok || versionRE.FindString(version) != version {
+		version, versionEnd = "", 0
+		if loc := versionRE.FindIndex(b); loc != nil {
+			version, versionEnd = string(b[loc[0]:loc[1]]), loc[1]
+		}
+	}
+	s.GameVersion = version
+	s.CompatibilityWarning = compatibilityWarning(version)
 	if date, ok := summaryGameDate(b, s.GameVersion); ok {
 		s.GameDate = date.Format("2006-01-02")
 	}
 	// Stored summary starts with a text-list of competition labels. After that list,
 	// two length-prefixed strings are the manager and current club display names.
-	loc := versionRE.FindIndex(b)
-	if loc != nil {
-		p := loc[1]
+	if versionEnd != 0 {
+		p := versionEnd
 		if p+4 <= len(b) {
 			count := int(binary.LittleEndian.Uint32(b[p:]))
 			p += 4

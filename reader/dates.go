@@ -44,17 +44,20 @@ func fmDate(data []byte, at int) (time.Time, bool) {
 	return date, true
 }
 
-// summaryGameDate follows the FM27 summary's division list and two labels.
-func summaryGameDate(data []byte, version string) (time.Time, bool) {
+func summaryVersionField(data []byte) (string, int, bool) {
 	if len(data) < 12 {
-		return time.Time{}, false
+		return "", 0, false
 	}
 	initial := uint64(binary.LittleEndian.Uint32(data[8:]))
 	if initial > 65536 || initial > uint64(len(data)-12) {
-		return time.Time{}, false
+		return "", 0, false
 	}
-	at := 12 + int(initial)
-	storedVersion, next, ok := parseLengthString(data, at)
+	return parseLengthString(data, 12+int(initial))
+}
+
+// summaryGameDate follows the FM27 summary's division list and two labels.
+func summaryGameDate(data []byte, version string) (time.Time, bool) {
+	storedVersion, next, ok := summaryVersionField(data)
 	if !ok || storedVersion != version || next+4 > len(data) {
 		return time.Time{}, false
 	}
@@ -62,7 +65,7 @@ func summaryGameDate(data []byte, version string) (time.Time, bool) {
 	if count > 4096 {
 		return time.Time{}, false
 	}
-	at = next + 4
+	at := next + 4
 	for i := uint32(0); i < count; i++ {
 		_, at, ok = parseLengthString(data, at)
 		if !ok {

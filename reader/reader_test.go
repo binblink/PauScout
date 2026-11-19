@@ -1,6 +1,7 @@
 package reader
 
 import (
+	"encoding/binary"
 	"os"
 	"path/filepath"
 	"strings"
@@ -19,6 +20,40 @@ func TestRejectGarbage(t *testing.T) {
 		t.Fatal("expected invalid directory rejection")
 	}
 }
+
+func TestParseSummaryBuildWarning(t *testing.T) {
+	for _, test := range []struct {
+		name        string
+		build       string
+		wantWarning bool
+	}{
+		{"original", "27.0.1+2503222", false},
+		{"latest tested", "27.1.0+2505117", false},
+		{"new patch", "27.1.1+2505999", true},
+		{"new edition", "28.0.0+2800000", true},
+		{"unidentified", "", true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			data := make([]byte, 12)
+			if test.build != "" {
+				preamble := []byte("26.0.0+2600000")
+				binary.LittleEndian.PutUint32(data[8:], uint32(len(preamble)))
+				data = append(data, preamble...)
+				data = binary.LittleEndian.AppendUint32(data, uint32(len(test.build)))
+				data = append(data, test.build...)
+			}
+			var summary Summary
+			parseSaveSummary(&summary, data)
+			if summary.GameVersion != test.build || (summary.CompatibilityWarning != "") != test.wantWarning {
+				t.Fatalf("build = %q, avertissement = %q", summary.GameVersion, summary.CompatibilityWarning)
+			}
+			if test.wantWarning && (!strings.Contains(summary.CompatibilityWarning, test.build) || !strings.Contains(summary.CompatibilityWarning, "copie")) {
+				t.Fatalf("avertissement incomplet : %q", summary.CompatibilityWarning)
+			}
+		})
+	}
+}
+
 func TestProvidedSample(t *testing.T) {
 	path := os.Getenv("FM27_SAMPLE")
 	if path == "" {
@@ -57,15 +92,15 @@ func TestProvidedSample(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !SupportsGameVersion(s.GameVersion) || s.Manager != "Binbin Carpenter" || s.Club != "Pau FC" {
+	if s.Manager != "Binbin Carpenter" || s.Club != "Pau FC" {
 		t.Fatalf("wrong metadata: %+v", s)
 	}
 	knownSummaries := map[int64]struct{ version, date string }{
 		151111254: {"27.0.1+2503222", "2027-08-20"},
 		142185783: {"27.1.0+2505117", "2027-06-06"},
 	}
-	if want, ok := knownSummaries[stat.Size()]; ok && (s.GameVersion != want.version || s.GameDate != want.date) {
-		t.Fatalf("version/date = %s/%s, want %s/%s", s.GameVersion, s.GameDate, want.version, want.date)
+	if want, ok := knownSummaries[stat.Size()]; ok && (s.GameVersion != want.version || s.GameDate != want.date || s.CompatibilityWarning != "") {
+		t.Fatalf("version/date = %s/%s, want %s/%s, compatibility warning = %q", s.GameVersion, s.GameDate, want.version, want.date, s.CompatibilityWarning)
 	}
 	if stat.Size() == 140931722 && s.GameDate != "2027-06-04" {
 		t.Fatalf("game date=%q want 2027-06-04", s.GameDate)
