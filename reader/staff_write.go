@@ -170,7 +170,12 @@ func applyStaffEdits(data []byte, edits []StaffEdit) (int, error) {
 	return changed, nil
 }
 
-// WriteStaffEdits uses the same validated FMF replacement as player edits.
+// WriteStaffEdits replaces the save after publishing a backup of its source.
 func WriteStaffEdits(path string, edits []StaffEdit) (int, error) {
-	return writeGameDBEdits(path, func(data []byte) (int, error) { return applyStaffEdits(data, edits) })
+	result, err := SaveStaffEdits(path, edits, SaveReplace)
+	return result.Changed, err
+}
+
+func SaveStaffEdits(path string, edits []StaffEdit, mode SaveMode) (SaveResult, error) {
+	return writeGameDBEdits(path, mode, func(data []byte) (int, error) { return applyStaffEdits(data, edits) })
 }

@@ -59,12 +59,16 @@ func TestWriteStaffEditsOnCopy(t *testing.T) {
 	if newScout > 20 {
 		newScout = 19
 	}
-	count, err := WriteStaffEdits(path, []StaffEdit{{ID: 10423, CA: &newCA, PA: &newPA, Attrs: map[string]uint8{"authority": newAuthority}, Roles: map[string]uint8{"scout": newScout}, BirthDate: &newBirth}})
+	originalDigest := saveDigest(t, path)
+	result, err := SaveStaffEdits(path, []StaffEdit{{ID: 10423, CA: &newCA, PA: &newPA, Attrs: map[string]uint8{"authority": newAuthority}, Roles: map[string]uint8{"scout": newScout}, BirthDate: &newBirth}}, SaveReplace)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if count != 5 {
-		t.Fatalf("modifications=%d, attendu 5", count)
+	if result.Changed != 5 || result.Path != path || filepath.Base(result.BackupPath) != "staff - secours.fm" {
+		t.Fatalf("résultat du remplacement inattendu : %+v", result)
+	}
+	if saveDigest(t, result.BackupPath) != originalDigest {
+		t.Fatal("la sauvegarde de secours diffère de la source")
 	}
 	if _, err = ReadDirectory(path); err != nil {
 		t.Fatal(err)
@@ -109,7 +113,7 @@ func TestWriteStaffEditsOnCopy(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(files) != 1 || files[0].Name() != "staff.fm" {
+	if len(files) != 2 {
 		t.Fatalf("fichiers après remplacement : %v", files)
 	}
 }

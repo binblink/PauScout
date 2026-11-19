@@ -169,6 +169,14 @@ func ReadPlayerCatalog(path string) (*PlayerCatalog, error) {
 	if err != nil {
 		return nil, err
 	}
+	summary, err := Read(path)
+	if err != nil {
+		return nil, err
+	}
+	return readCatalog(path, data, summary.GameDate, nil)
+}
+
+func readCatalog(path string, data []byte, gameDate string, layout *catalogLayout) (*PlayerCatalog, error) {
 	pools, err := locateNamePools(data)
 	if err != nil {
 		return nil, err
@@ -177,11 +185,7 @@ func ReadPlayerCatalog(path string) (*PlayerCatalog, error) {
 	if err != nil {
 		return nil, err
 	}
-	summary, err := Read(path)
-	if err != nil {
-		return nil, err
-	}
-	clock, _ := time.Parse("2006-01-02", summary.GameDate)
+	clock, _ := time.Parse("2006-01-02", gameDate)
 	clubsByTeam := teamClubInfo(data)
 	countries := nationNames(data)
 	leagues := resolveClubLeagues(path, clubsByTeam)
@@ -227,6 +231,16 @@ func ReadPlayerCatalog(path string) (*PlayerCatalog, error) {
 			attrs[key] = displayAttribute(data[start+39+slot])
 		}
 		name, known := identity.Name, err == nil
+		if layout != nil {
+			offsets := recordOffsets{Closing: closing - start}
+			if known {
+				offsets.Birth = identity.personalityOffset - 22 - start
+				if identity.traitsOffset >= start && identity.traitsOffset+8 <= closing {
+					offsets.Traits = identity.traitsOffset - start
+				}
+			}
+			layout.players[id] = offsets
+		}
 		if !known {
 			name = fmt.Sprintf("Joueur ID %d", id)
 		} else {
@@ -318,6 +332,10 @@ func ReadPlayerCatalog(path string) (*PlayerCatalog, error) {
 			staffSquads[player.TeamID] = player.Squad
 		}
 	}
-	result.Staff = readStaffCatalogData(data, pools, clock, clubsByTeam, countries, leagues, staffSquads)
+	var staffOffsets map[uint32]recordOffsets
+	if layout != nil {
+		staffOffsets = layout.staff
+	}
+	result.Staff = readStaffCatalogData(data, pools, clock, clubsByTeam, countries, leagues, staffSquads, staffOffsets)
 	return result, nil
 }

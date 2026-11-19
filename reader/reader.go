@@ -27,16 +27,25 @@ const (
 
 var versionRE = regexp.MustCompile(`\b\d+\.\d+\.\d+\+\d+\b`)
 
-func compatibilityWarning(version string) string {
+// SupportsWriteVersion identifies the builds with validated editing support.
+// Read and ReadPlayerCatalog try compatible structures independently of the build.
+func SupportsWriteVersion(version string) bool {
 	switch version {
 	case "27.0.1+2503222", lastTestedBuild:
+		return true
+	}
+	return false
+}
+
+func compatibilityWarning(version string) string {
+	if SupportsWriteVersion(version) {
 		return ""
 	}
 	message := "Le build FM de cette sauvegarde reste inconnu."
 	if version != "" {
 		message = fmt.Sprintf("Le build FM %s n’a pas été testé avec PauScout.", version)
 	}
-	return message + " Le dernier build testé est le " + lastTestedBuild + ". La lecture ou l’écriture peut échouer. Utilise une copie de ta sauvegarde."
+	return message + " PauScout tente de lire la sauvegarde en consultation seule. Le dernier build testé pour l’édition est le " + lastTestedBuild + "."
 }
 
 type Frame struct {

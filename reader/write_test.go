@@ -1,12 +1,27 @@
 package reader
 
 import (
+	"crypto/sha256"
 	"io"
 	"os"
 	"path/filepath"
 	"strconv"
 	"testing"
 )
+
+func saveDigest(t *testing.T, path string) [sha256.Size]byte {
+	t.Helper()
+	f, err := os.Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	digest := sha256.New()
+	if _, err := io.Copy(digest, f); err != nil {
+		t.Fatal(err)
+	}
+	return [sha256.Size]byte(digest.Sum(nil))
+}
 
 func TestWritePlayerEditsOnCopy(t *testing.T) {
 	source := os.Getenv("FM27_SAMPLE")
@@ -91,13 +106,19 @@ func TestWritePlayerEditsOnCopy(t *testing.T) {
 	if newHandling > 20 {
 		newHandling = 19
 	}
-	count, err := WritePlayerEdits(target, []PlayerEdit{{ID: playerID, CA: &newCA, PA: &newPA, Attrs: map[string]uint8{"handling": newHandling}, Personality: map[string]uint8{"professionalism": newProfessionalism}, Traits: map[int]bool{0: newTrait}, Height: &newHeight, CurrentRep: &newRep, BirthDate: &newBirth, Value: &newValue}})
+	original := target
+	originalDigest := saveDigest(t, original)
+	result, err := SavePlayerEdits(original, []PlayerEdit{{ID: playerID, CA: &newCA, PA: &newPA, Attrs: map[string]uint8{"handling": newHandling}, Personality: map[string]uint8{"professionalism": newProfessionalism}, Traits: map[int]bool{0: newTrait}, Height: &newHeight, CurrentRep: &newRep, BirthDate: &newBirth, Value: &newValue}}, "")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if count < 1 {
-		t.Fatalf("aucune valeur écrite : %d", count)
+	if result.Changed < 1 || result.Path == original || result.BackupPath != "" || filepath.Base(result.Path) != "test - PauScout.fm" {
+		t.Fatalf("résultat de la copie inattendu : %+v", result)
 	}
+	if saveDigest(t, original) != originalDigest {
+		t.Fatal("la sauvegarde source a changé")
+	}
+	target = result.Path
 	if _, err = ReadDirectory(target); err != nil {
 		t.Fatal(err)
 	}
@@ -155,7 +176,7 @@ func TestWritePlayerEditsOnCopy(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(files) != 1 || files[0].Name() != "test.fm" {
-		t.Fatalf("fichiers après remplacement : %v", files)
+	if len(files) != 2 {
+		t.Fatalf("fichiers après création de la copie : %v", files)
 	}
 }

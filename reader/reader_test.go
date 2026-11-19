@@ -47,7 +47,7 @@ func TestParseSummaryBuildWarning(t *testing.T) {
 			if summary.GameVersion != test.build || (summary.CompatibilityWarning != "") != test.wantWarning {
 				t.Fatalf("build = %q, avertissement = %q", summary.GameVersion, summary.CompatibilityWarning)
 			}
-			if test.wantWarning && (!strings.Contains(summary.CompatibilityWarning, test.build) || !strings.Contains(summary.CompatibilityWarning, "copie")) {
+			if test.wantWarning && (!strings.Contains(summary.CompatibilityWarning, test.build) || !strings.Contains(summary.CompatibilityWarning, "consultation seule")) {
 				t.Fatalf("avertissement incomplet : %q", summary.CompatibilityWarning)
 			}
 		})
@@ -91,6 +91,9 @@ func TestProvidedSample(t *testing.T) {
 	s, err := Read(path)
 	if err != nil {
 		t.Fatal(err)
+	}
+	if expected := os.Getenv("FM27_EXPECTED_BUILD"); expected != "" && s.GameVersion != expected {
+		t.Fatalf("build = %q, attendu %q", s.GameVersion, expected)
 	}
 	if s.Manager != "Binbin Carpenter" || s.Club != "Pau FC" {
 		t.Fatalf("wrong metadata: %+v", s)

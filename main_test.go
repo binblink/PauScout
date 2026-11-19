@@ -66,15 +66,26 @@ func TestSaveCatalogEndpoints(t *testing.T) {
 			t.Fatalf("ouverture locale HTTP %d : %s", response.Code, response.Body)
 		}
 		var result struct {
-			Summary catalogSummary `json:"summary"`
-			Token   string         `json:"token"`
+			Summary      catalogSummary `json:"summary"`
+			Token        string         `json:"token"`
+			WriteAllowed bool           `json:"write_allowed"`
 		}
 		if err := json.Unmarshal(response.Body.Bytes(), &result); err != nil {
 			t.Fatal(err)
 		}
 		check(t, result.Summary)
-		if result.Token == "" {
-			t.Fatal("session d'édition absente")
+		wantWrite := reader.SupportsWriteVersion(want.GameVersion)
+		if result.WriteAllowed != wantWrite || (result.Token != "") != wantWrite {
+			t.Fatalf("capacité d'écriture incorrecte pour %s : %t", want.GameVersion, result.WriteAllowed)
+		}
+		if !wantWrite {
+			response := httptest.NewRecorder()
+			request := httptest.NewRequest(http.MethodPost, "/api/enregistrer", bytes.NewBufferString(`{"token":"previous","edits":[]}`))
+			request.Header.Set("Content-Type", "application/json")
+			a.saveEdits(response, request)
+			if response.Code != http.StatusConflict {
+				t.Fatalf("tentative d'écriture en consultation seule : HTTP %d", response.Code)
+			}
 		}
 	})
 }

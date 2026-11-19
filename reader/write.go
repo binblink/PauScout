@@ -381,119 +381,147 @@ func writeRepackedSave(source, stage *os.File, game DirectoryEntry, gameFrame, f
 	return stage.Sync()
 }
 
-// WritePlayerEdits validates a complete staged FMF file before atomically
-// replacing the existing save at the same path. No second game save remains.
+// WritePlayerEdits replaces the save after publishing a backup of its source.
 func WritePlayerEdits(path string, edits []PlayerEdit) (int, error) {
-	return writeGameDBEdits(path, func(data []byte) (int, error) { return applyPlayerEdits(data, edits) })
+	result, err := SavePlayerEdits(path, edits, SaveReplace)
+	return result.Changed, err
 }
 
-func writeGameDBEdits(path string, mutate func([]byte) (int, error)) (int, error) {
+func SavePlayerEdits(path string, edits []PlayerEdit, mode SaveMode) (SaveResult, error) {
+	return writeGameDBEdits(path, mode, func(data []byte) (int, error) { return applyPlayerEdits(data, edits) })
+}
+
+func writeGameDBEdits(path string, mode SaveMode, mutate func([]byte) (int, error)) (SaveResult, error) {
+	if mode == "" {
+		mode = SaveCopy
+	}
+	if mode != SaveCopy && mode != SaveReplace {
+		return SaveResult{}, errors.New("mode d’enregistrement inconnu")
+	}
 	if !strings.EqualFold(filepath.Ext(path), ".fm") {
-		return 0, errors.New("sélectionne une sauvegarde .fm")
+		return SaveResult{}, errors.New("sélectionne une sauvegarde .fm")
 	}
 	path, err := filepath.Abs(path)
 	if err != nil {
-		return 0, err
-	}
-	if _, err := Read(path); err != nil {
-		return 0, err
-	}
-	directory, err := ReadDirectory(path)
-	if err != nil {
-		return 0, err
-	}
-	var game *DirectoryEntry
-	for i := range directory.Entries {
-		entry := &directory.Entries[i]
-		if entry.Group == "" && entry.Name == "game_db" && entry.Extension == ".dat" {
-			game = entry
-			break
-		}
-	}
-	if game == nil {
-		return 0, errors.New("game_db absent")
+		return SaveResult{}, err
 	}
 	source, err := os.Open(path)
 	if err != nil {
-		return 0, err
+		return SaveResult{}, err
 	}
 	defer source.Close()
 	before, err := source.Stat()
 	if err != nil {
-		return 0, err
+		return SaveResult{}, err
+	}
+	summary, err := Read(path)
+	if err != nil {
+		return SaveResult{}, err
+	}
+	if !SupportsWriteVersion(summary.GameVersion) {
+		return SaveResult{}, fmt.Errorf("build FM %q ouvert en consultation seule", summary.GameVersion)
+	}
+	directory, err := ReadDirectory(path)
+	if err != nil {
+		return SaveResult{}, err
+	}
+	game, err := gameDBEntry(directory)
+	if err != nil {
+		return SaveResult{}, err
 	}
 	var head [26]byte
 	if _, err := source.ReadAt(head[:], 0); err != nil {
-		return 0, err
+		return SaveResult{}, err
 	}
 	suffix := int64(binary.LittleEndian.Uint64(head[9:17])) + 9
 	payload, err := directoryPayload(source, suffix)
 	if err != nil {
-		return 0, err
+		return SaveResult{}, err
 	}
 	data, err := readGameDB(path)
 	if err != nil {
-		return 0, err
+		return SaveResult{}, err
 	}
 	changed, err := mutate(data)
 	if err != nil {
-		return 0, err
+		return SaveResult{}, err
 	}
 	gameFrame, err := compressFMFrame(data)
 	if err != nil {
-		return 0, err
+		return SaveResult{}, err
 	}
 	if len(gameFrame) < 6 || !bytes.Equal(gameFrame[:6], []byte{0x28, 0xb5, 0x2f, 0xfd, 0x04, 0x50}) {
-		return 0, errors.New("en-tête Zstandard FM27 inattendu")
+		return SaveResult{}, errors.New("en-tête Zstandard FM27 inattendu")
 	}
 	if err := patchDirectoryPayload(payload, game.Offset, game.Compressed, int64(len(gameFrame))); err != nil {
-		return 0, err
+		return SaveResult{}, err
 	}
 	footerFrame, err := compressFMFrame(payload)
 	if err != nil {
-		return 0, err
+		return SaveResult{}, err
 	}
 	stage, err := os.CreateTemp(filepath.Dir(path), ".pauscout-*.tmp")
 	if err != nil {
-		return 0, err
+		return SaveResult{}, err
 	}
 	stagePath := stage.Name()
 	defer os.Remove(stagePath)
 	defer stage.Close()
-	if err := stage.Chmod(before.Mode()); err != nil {
-		return 0, err
+	modeBits := before.Mode()
+	if mode == SaveCopy {
+		modeBits |= 0200
+	}
+	if err := stage.Chmod(modeBits); err != nil {
+		return SaveResult{}, err
 	}
 	if err := writeRepackedSave(source, stage, *game, gameFrame, footerFrame, suffix); err != nil {
-		return 0, err
+		return SaveResult{}, err
 	}
 	if err := stage.Close(); err != nil {
-		return 0, err
+		return SaveResult{}, err
 	}
 	if _, err := ReadDirectory(stagePath); err != nil {
-		return 0, fmt.Errorf("sauvegarde vérifiée invalide : %w", err)
+		return SaveResult{}, fmt.Errorf("sauvegarde vérifiée invalide : %w", err)
 	}
 	decoded, err := readGameDB(stagePath)
 	if err != nil {
-		return 0, fmt.Errorf("game_db réécrit invalide : %w", err)
+		return SaveResult{}, fmt.Errorf("game_db réécrit invalide : %w", err)
 	}
 	if !bytes.Equal(data, decoded) {
-		return 0, errors.New("game_db réécrit diffère des modifications prévues")
+		return SaveResult{}, errors.New("game_db réécrit diffère des modifications prévues")
 	}
-	if _, err := Read(stagePath); err != nil {
-		return 0, fmt.Errorf("résumé FMF réécrit invalide : %w", err)
-	}
-	current, err := os.Stat(path)
+	stagedSummary, err := Read(stagePath)
 	if err != nil {
-		return 0, err
+		return SaveResult{}, fmt.Errorf("résumé FMF réécrit invalide : %w", err)
 	}
-	if current.Size() != before.Size() || !current.ModTime().Equal(before.ModTime()) {
-		return 0, errors.New("la sauvegarde a changé depuis son ouverture")
+	if stagedSummary.GameVersion != summary.GameVersion {
+		return SaveResult{}, errors.New("le build de la sauvegarde a changé pendant l’enregistrement")
 	}
+	if err := checkUnchanged(path, before); err != nil {
+		return SaveResult{}, err
+	}
+	if mode == SaveCopy {
+		target, err := publishRelatedSave(stagePath, path, copySuffix)
+		if err != nil {
+			return SaveResult{}, err
+		}
+		return SaveResult{Path: target, Changed: changed}, nil
+	}
+
+	backup, err := backupOriginal(source, path, before)
+	if err != nil {
+		return SaveResult{}, fmt.Errorf("création de la sauvegarde de secours impossible : %w", err)
+	}
+	result := SaveResult{BackupPath: backup}
 	if err := source.Close(); err != nil {
-		return 0, err
+		return result, err
+	}
+	if err := checkUnchanged(path, before); err != nil {
+		return result, err
 	}
 	if err := replaceExistingSave(path, stagePath); err != nil {
-		return 0, err
+		return result, err
 	}
-	return changed, nil
+	result.Path, result.Changed = path, changed
+	return result, nil
 }

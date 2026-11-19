@@ -35,11 +35,7 @@ type PlayerAbility struct {
 	closingOffset     int
 }
 
-func readGameDB(path string) ([]byte, error) {
-	directory, err := ReadDirectory(path)
-	if err != nil {
-		return nil, err
-	}
+func gameDBEntry(directory *Directory) (*DirectoryEntry, error) {
 	var section *DirectoryEntry
 	for i := range directory.Entries {
 		e := &directory.Entries[i]
@@ -53,6 +49,10 @@ func readGameDB(path string) ([]byte, error) {
 	if section == nil || section.Uncompressed > maxGameDBBytes {
 		return nil, errors.New("section game_db absente ou trop grande")
 	}
+	return section, nil
+}
+
+func readGameDBSection(path string, section *DirectoryEntry) ([]byte, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -66,7 +66,32 @@ func readGameDB(path string) ([]byte, error) {
 	if len(data) > maxGameDBBytes || uint64(len(data)) != section.Uncompressed {
 		return nil, errors.New("taille de game_db incoherente")
 	}
-	if len(data) < 8 || !bytes.Equal(data[:6], []byte("\x03\x01tad.")) || binary.LittleEndian.Uint16(data[6:8]) != 4000 {
+	return data, nil
+}
+
+const supportedGameDBSchema = 4000
+
+func gameDBSchema(data []byte) (uint16, bool) {
+	if len(data) < 8 || !bytes.Equal(data[:6], []byte("\x03\x01tad.")) {
+		return 0, false
+	}
+	return binary.LittleEndian.Uint16(data[6:8]), true
+}
+
+func readGameDB(path string) ([]byte, error) {
+	directory, err := ReadDirectory(path)
+	if err != nil {
+		return nil, err
+	}
+	section, err := gameDBEntry(directory)
+	if err != nil {
+		return nil, err
+	}
+	data, err := readGameDBSection(path, section)
+	if err != nil {
+		return nil, err
+	}
+	if schema, ok := gameDBSchema(data); !ok || schema != supportedGameDBSchema {
 		return nil, errors.New("schema game_db FM27 non pris en charge")
 	}
 	return data, nil

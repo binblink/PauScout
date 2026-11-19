@@ -28,7 +28,7 @@ import (
 var website embed.FS
 
 const (
-	appVersion = "0.14.4"
+	appVersion = "0.15.0"
 	maxUpload  = 800 << 20
 	maxSave    = 1400 << 20
 )
@@ -36,15 +36,14 @@ const (
 var tabCloseDelay = 30 * time.Second
 
 type api struct {
-	srv      *http.Server
-	tabsMu   sync.Mutex
-	tabs     map[string]bool
-	tabsGen  uint64
-	mu       sync.Mutex
-	source   string
-	size     int64
-	modified time.Time
-	token    string
+	srv        *http.Server
+	tabsMu     sync.Mutex
+	tabs       map[string]bool
+	tabsGen    uint64
+	mu         sync.Mutex
+	source     string
+	sourceInfo os.FileInfo
+	token      string
 }
 
 // tabLifecycle waits through reloads and only stops after the last tab leaves.
@@ -141,34 +140,25 @@ func (a *api) openLocal(w http.ResponseWriter, r *http.Request) {
 	}
 	a.mu.Lock()
 	defer a.mu.Unlock()
+	a.source, a.token, a.sourceInfo = "", "", nil
 	s, err := reader.Read(path)
 	if err != nil {
 		a.json(w, 422, map[string]string{"error": err.Error()})
 		return
 	}
-	catalog, err := reader.ReadPlayerCatalog(path)
-	if err != nil {
-		a.json(w, 422, map[string]string{"error": err.Error(), "compatibility_warning": s.CompatibilityWarning})
-		return
-	}
-	var secret [24]byte
-	if _, err = rand.Read(secret[:]); err != nil {
-		a.json(w, 500, map[string]string{"error": "Session impossible"})
-		return
-	}
-	a.source = path
-	a.size = info.Size()
-	a.modified = info.ModTime()
-	a.token = hex.EncodeToString(secret[:])
 	s.File = filepath.Base(path)
-	s.Players = catalog.Players
-	s.Staff = catalog.Staff
-	s.EuroRate = catalog.EuroRate
-	s.Coverage = &catalog.Coverage
-	s.AttributeOrder = reader.AttributeOrder()
-	s.StaffAttributeOrder = reader.StaffAttributeOrder()
-	s.StaffRoleOrder = reader.StaffRoleOrder()
-	a.json(w, 200, map[string]any{"summary": s, "path": path, "token": a.token})
+	writeAllowed := loadSaveCatalog(path, s) && reader.SupportsWriteVersion(s.GameVersion)
+	result := map[string]any{"summary": s, "path": path, "write_allowed": writeAllowed}
+	if writeAllowed {
+		var secret [24]byte
+		if _, err = rand.Read(secret[:]); err != nil {
+			a.json(w, 500, map[string]string{"error": "Session impossible"})
+			return
+		}
+		a.source, a.sourceInfo, a.token = path, info, hex.EncodeToString(secret[:])
+		result["token"] = a.token
+	}
+	a.json(w, 200, result)
 }
 
 func (a *api) saveEdits(w http.ResponseWriter, r *http.Request)      { a.saveChanges(w, r, false) }
@@ -186,46 +176,55 @@ func (a *api) saveChanges(w http.ResponseWriter, r *http.Request, staff bool) {
 	var req struct {
 		Token string          `json:"token"`
 		Edits json.RawMessage `json:"edits"`
+		Mode  reader.SaveMode `json:"mode"`
 	}
 	if err := json.NewDecoder(io.LimitReader(r.Body, 65536)).Decode(&req); err != nil {
 		a.json(w, 400, map[string]string{"error": "Modifications invalides : " + err.Error()})
 		return
 	}
+	if req.Mode != "" && req.Mode != reader.SaveCopy && req.Mode != reader.SaveReplace {
+		a.json(w, 400, map[string]string{"error": "Mode d’enregistrement inconnu"})
+		return
+	}
 	a.mu.Lock()
 	defer a.mu.Unlock()
-	if a.source == "" || req.Token == "" || req.Token != a.token {
+	if a.source == "" || a.sourceInfo == nil || req.Token == "" || req.Token != a.token {
 		a.json(w, 409, map[string]string{"error": "Rouvre la sauvegarde locale avant d'enregistrer"})
 		return
 	}
 	info, err := os.Stat(a.source)
-	if err != nil || info.Size() != a.size || !info.ModTime().Equal(a.modified) {
+	if err != nil || !os.SameFile(info, a.sourceInfo) || info.Size() != a.sourceInfo.Size() || !info.ModTime().Equal(a.sourceInfo.ModTime()) {
 		a.json(w, 409, map[string]string{"error": "La sauvegarde a changé sur le disque ; rouvre-la avant d'enregistrer"})
 		return
 	}
-	var count int
+	var result reader.SaveResult
 	if staff {
 		var edits []reader.StaffEdit
 		if err = json.Unmarshal(req.Edits, &edits); err == nil {
-			count, err = reader.WriteStaffEdits(a.source, edits)
+			result, err = reader.SaveStaffEdits(a.source, edits, req.Mode)
 		}
 	} else {
 		var edits []reader.PlayerEdit
 		if err = json.Unmarshal(req.Edits, &edits); err == nil {
-			count, err = reader.WritePlayerEdits(a.source, edits)
+			result, err = reader.SavePlayerEdits(a.source, edits, req.Mode)
 		}
 	}
 	if err != nil {
-		a.json(w, 422, map[string]string{"error": "Écriture interrompue : " + err.Error()})
+		failure := map[string]string{"error": "Écriture interrompue : " + err.Error()}
+		if result.BackupPath != "" {
+			failure["backup_path"] = result.BackupPath
+		}
+		a.json(w, 422, failure)
 		return
 	}
-	info, err = os.Stat(a.source)
+	info, err = os.Stat(result.Path)
 	if err != nil {
-		a.json(w, 500, map[string]string{"error": "Sauvegarde écrite, mais fichier inaccessible : " + err.Error()})
+		a.source, a.token, a.sourceInfo = "", "", nil
+		a.json(w, 500, map[string]string{"error": fmt.Sprintf("Sauvegarde écrite dans %s, accès impossible : %s", result.Path, err)})
 		return
 	}
-	a.size = info.Size()
-	a.modified = info.ModTime()
-	a.json(w, 200, map[string]any{"changed": count, "path": a.source})
+	a.source, a.sourceInfo = result.Path, info
+	a.json(w, 200, result)
 }
 
 func (a *api) json(w http.ResponseWriter, status int, obj any) {
@@ -243,8 +242,7 @@ func (a *api) upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	a.mu.Lock()
-	a.source = ""
-	a.token = ""
+	a.source, a.token, a.sourceInfo = "", "", nil
 	a.mu.Unlock()
 	if r.ContentLength > maxUpload {
 		a.json(w, 413, map[string]string{"error": "Fichier trop volumineux (800 Mo maximum)"})
@@ -329,15 +327,15 @@ func (a *api) upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.File = name
+	loadSaveCatalog(savePath, s)
+	a.json(w, 200, s)
+}
+
+func loadSaveCatalog(savePath string, s *reader.Summary) bool {
 	catalog, catalogErr := reader.ReadPlayerCatalog(savePath)
 	if catalogErr != nil {
-		if s.CompatibilityWarning == "" {
-			a.json(w, 422, map[string]string{"error": "Joueurs FM27 illisibles : " + catalogErr.Error()})
-			return
-		}
 		s.Note = "Catalogue FM illisible : " + catalogErr.Error()
-		a.json(w, 200, s)
-		return
+		return false
 	}
 	s.Players = catalog.Players
 	s.Staff = catalog.Staff
@@ -347,7 +345,7 @@ func (a *api) upload(w http.ResponseWriter, r *http.Request) {
 	s.StaffAttributeOrder = reader.StaffAttributeOrder()
 	s.StaffRoleOrder = reader.StaffRoleOrder()
 	s.Note = fmt.Sprintf("Liste partielle vérifiée : %d fiches liées à un ID (%d hommes, %d femmes), dont %d noms et %d clubs retrouvés, sur %d entrées annoncées. Le fichier n'a pas été modifié.", catalog.Coverage.WithID, catalog.Coverage.Men, catalog.Coverage.Women, catalog.Coverage.WithName, catalog.Coverage.WithClub, catalog.Coverage.Indexed)
-	a.json(w, 200, s)
+	return true
 }
 
 func (a *api) close(w http.ResponseWriter, r *http.Request) {
@@ -421,8 +419,34 @@ func run() error {
 }
 
 func main() {
+	if len(os.Args) > 1 && os.Args[1] == "--compare-saves" {
+		if err := writeCompatibilityReport(os.Args[2:]); err != nil {
+			log.Println(err)
+			os.Exit(1)
+		}
+		return
+	}
 	if err := run(); err != nil {
 		log.Println("Erreur PauScout:", err)
 		os.Exit(1)
 	}
+}
+
+func writeCompatibilityReport(args []string) error {
+	if len(args) != 3 {
+		return errors.New("utilisation : PauScout_FM27.exe --compare-saves avant.fm apres.fm rapport.json")
+	}
+	report := reader.CompareSaves(args[0], args[1])
+	file, err := os.OpenFile(args[2], os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
+	if err != nil {
+		return err
+	}
+	encoder := json.NewEncoder(file)
+	encoder.SetIndent("", "  ")
+	err = encoder.Encode(report)
+	if combined := errors.Join(err, file.Close()); combined != nil {
+		_ = os.Remove(args[2])
+		return combined
+	}
+	return nil
 }

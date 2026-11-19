@@ -49,6 +49,7 @@ body:has(.profile-dialog[open]){overflow:hidden}
 .profile-finances dt{color:var(--muted);font-size:12px}
 .profile-finances dd{margin:0;font-size:15px;font-weight:760;font-variant-numeric:tabular-nums}
 .profile-dialog .editor-save{flex:none;padding:12px 22px;border-top:1px solid #385a50}
+.editor-save select{width:auto;max-width:100%;font-size:12px;padding:8px}
 @media(max-width:720px){.profile-scroll .attr-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:480px){
   .profile-dialog{width:calc(100% - 16px);max-height:calc(100dvh - 16px)}
@@ -94,15 +95,19 @@ body:has(.profile-dialog[open]){overflow:hidden}
     <div class="field"><button id="exportEdits" class="btn">Exporter les modifications</button></div>
     <div class="note">La sélection et les modifications en attente restent dans ce navigateur. Le bouton Enregistrer les stats écrit dans la partie locale ouverte.</div>
   </section>
-  <div class="side-footer">PAUSCOUT v0.14.4 · Édition locale des joueurs et du staff · Non affilié à SEGA ou Sports Interactive.</div>
+  <div class="side-footer">PAUSCOUT v0.15.0 · Édition locale des joueurs et du staff · Non affilié à SEGA ou Sports Interactive.</div>
 </aside>
 <main class="main">
   <div class="topline"><div><div class="micro">FOOTBALL MANAGER 2027 / JOUEURS</div><h1 class="title">Explore et modifie <b>ta partie.</b></h1><p class="subtitle">Parcours les clubs, consulte les joueurs et enregistre leurs stats dans ta sauvegarde locale.</p></div><div class="top-actions"><div id="status" class="live">● Local et privé</div><button id="importTop" type="button" class="btn btn-primary">⇧ Importer pour consulter</button><button id="quit" class="btn btn-outline" style="padding:6px 10px">Quitter</button></div></div>
   <section class="panel" style="padding:18px 22px;margin-top:20px;border-color:#3d6959">
     <h3 style="margin:0 0 8px">Modifier une sauvegarde existante</h3>
-    <p class="note" style="margin:0 0 12px">Choisis le fichier local .fm, ouvre-le, modifie les valeurs dans une fiche joueur puis enregistre dans ce même fichier. Ferme la partie dans FM27 avant l'enregistrement.</p>
+    <p class="note" style="margin:0 0 12px">Ouvre une sauvegarde .fm, puis modifie les valeurs dans les fiches. PauScout enregistre par défaut dans un nouveau fichier. Ferme la partie dans FM27 avant tout remplacement.</p>
     <label for="localSave" class="small-muted" style="display:block;margin-bottom:6px">Sauvegarde à modifier</label>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><select id="localSave" style="flex:2;min-width:280px"><option value="">Recherche des sauvegardes…</option></select><button id="openLocal" class="btn btn-primary">Ouvrir cette partie</button><button id="saveEdits" class="btn btn-gold" disabled>Enregistrer les stats (0)</button></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><select id="localSave" style="flex:2;min-width:280px"><option value="">Recherche des sauvegardes…</option></select><button id="openLocal" class="btn btn-primary">Ouvrir cette partie</button></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px">
+      <select id="saveMode" style="width:auto;max-width:100%" aria-label="Mode d’enregistrement" disabled><option value="copy">Nouveau fichier</option><option value="replace">Remplacer avec copie de secours</option></select>
+      <button id="saveEdits" class="btn btn-gold" disabled>Enregistrer (0)</button>
+    </div>
     <p id="localPath" class="note" style="margin:10px 0 0;overflow-wrap:anywhere"></p>
     <p id="saveBuildWarning" class="build-warning hidden" role="status"></p>
   </section>
@@ -133,6 +138,7 @@ body:has(.profile-dialog[open]){overflow:hidden}
   <div id="detail" class="profile-scroll"></div>
   <footer class="editor-save">
     <span id="profileChanges"></span>
+    <select id="detailSaveMode" aria-label="Mode d’enregistrement" disabled><option value="copy">Nouveau fichier</option><option value="replace">Remplacer avec copie de secours</option></select>
     <button id="detailReset" class="btn btn-outline" type="button" disabled>Annuler la fiche</button>
     <button id="detailSave" class="btn btn-gold" type="button" disabled>Enregistrer (0)</button>
   </footer>
@@ -243,18 +249,21 @@ function notify(message,error=false){
 }
 function num(v){return v===null||v===undefined?'—':v}
 function persist(){try{localStorage.setItem('pauscout.shortlist',JSON.stringify([...playerShortlist]));localStorage.setItem('pauscout.staffShortlist',JSON.stringify([...staffShortlist]));localStorage.setItem('pauscout.changes',JSON.stringify(playerChanges));localStorage.setItem('pauscout.staffChanges',JSON.stringify(staffChanges))}catch{};updateSaveButton()}
-function pendingEdits(){return Object.entries(changes).filter(([uid])=>byId.has(uid)).map(([uid,change])=>({uid:Number(uid),...change}))}
+function consultationOnly(){return Boolean(lastSummary?.compatibility_warning)}
+function draftFor(uid){return consultationOnly()?undefined:changes[uid]}
+function pendingEdits(){return consultationOnly()?[]:Object.entries(changes).filter(([uid])=>byId.has(uid)).map(([uid,change])=>({uid:Number(uid),...change}))}
 function updateSaveButton(){
   const count=localToken?pendingEdits().length:0;
-  const disabled=saveInProgress||!count||$('localSave').value!==localOpenedPath;
-  $('saveEdits').disabled=$('detailSave').disabled=disabled;
-  $('saveEdits').textContent=saveInProgress?'Enregistrement en cours…':`Enregistrer les stats (${count})`;
+  const canChooseMode=!saveInProgress&&localToken&&$('localSave').value===localOpenedPath;
+  $('saveEdits').disabled=$('detailSave').disabled=!canChooseMode||!count;
+  $('saveMode').disabled=$('detailSaveMode').disabled=!canChooseMode;
+  $('saveEdits').textContent=saveInProgress?'Enregistrement en cours…':`Enregistrer (${count})`;
   $('detailSave').textContent=saveInProgress?'Enregistrement…':`Enregistrer (${count})`;
-  $('detailReset').disabled=saveInProgress||!changes[selected];
+  $('detailReset').disabled=saveInProgress||!draftFor(selected);
   $('detail').inert=saveInProgress;
 }
 function ageFromBirth(birth,gameDate){if(!birth||!gameDate||birth>gameDate)return null;const [y,m,d]=birth.split('-').map(Number),[gy,gm,gd]=gameDate.split('-').map(Number);if(!y||!gy)return null;return gy-y-(gm<m||gm===m&&gd<d?1:0)}
-function effective(p){let c=changes[p.uid];return c?{...p,ca:c.ca??p.ca,pa:c.pa??p.pa,value:c.value??p.value,birth_date:c.birth_date??p.birth_date,age:c.birth_date!==undefined?ageFromBirth(c.birth_date,lastSummary?.game_date):p.age,attrs:{...p.attrs,...(c.attrs||{})},roles:{...(p.roles||{}),...(c.roles||{})},personality:{...(p.personality||{}),...(c.personality||{})},positions_ratings:{...(p.positions_ratings||{}),...(c.positions_ratings||{})},traits:{...(p.traits||{}),...(c.traits||{})},height:c.height??p.height,home_rep:c.home_rep??p.home_rep,current_rep:c.current_rep??p.current_rep,world_rep:c.world_rep??p.world_rep}:p}
+function effective(p){let c=draftFor(p.uid);return c?{...p,ca:c.ca??p.ca,pa:c.pa??p.pa,value:c.value??p.value,birth_date:c.birth_date??p.birth_date,age:c.birth_date!==undefined?ageFromBirth(c.birth_date,lastSummary?.game_date):p.age,attrs:{...p.attrs,...(c.attrs||{})},roles:{...(p.roles||{}),...(c.roles||{})},personality:{...(p.personality||{}),...(c.personality||{})},positions_ratings:{...(p.positions_ratings||{}),...(c.positions_ratings||{})},traits:{...(p.traits||{}),...(c.traits||{})},height:c.height??p.height,home_rep:c.home_rep??p.home_rep,current_rep:c.current_rep??p.current_rep,world_rep:c.world_rep??p.world_rep}:p}
 function ensureAttributes(p){if(!p)return;let order=p.isStaff?staffAttributeOrder:fmAttributeOrder;if(p.attrsBase64){let raw=atob(p.attrsBase64);if(raw.length===order.length){for(let i=0;i<raw.length;i++){let value=raw.charCodeAt(i);if(value>=1&&value<=20)p.attrs[order[i]]=value}p.attrsBase64=''}}if(p.isStaff&&p.rolesBase64){let raw=atob(p.rolesBase64);if(raw.length===staffRoleOrder.length){for(let i=0;i<raw.length;i++){let value=raw.charCodeAt(i);if(value>=1&&value<=20)p.roles[staffRoleOrder[i]]=value}p.rolesBase64=''}}}
 function canonical(k){let m=norm(k).replace(/[\s.\-]+/g,'_');return ({'nom':'name','joueur':'name','player':'name','player_name':'name','age':'age','âge':'age','club_name':'club','team':'club','equipe':'club','équipe':'club','nationalite':'nation','nationality':'nation','poste':'position','positions':'position','pos':'position','current_ability':'ca','capacite_actuelle':'ca','ca':'ca','potential_ability':'pa','potentiel':'pa','pa':'pa','unique_id':'uid','player_id':'uid','id':'uid','value':'value','valeur':'value','transfer_value':'value','market_value':'value','salaire':'wage','salary':'wage','weekly_wage':'wage','contract_wage':'wage'})[m]||m}
 function genderValue(flat){let raw=flat.gender??flat.sexe??flat.sex;if(raw===undefined&&typeof flat.is_woman==='boolean')return flat.is_woman?'female':'male';let value=norm(raw);if(['male','m','homme','masculin','man','men'].includes(value))return 'male';if(['female','f','femme','feminin','woman','women'].includes(value))return 'female';return ''}
@@ -369,7 +378,7 @@ function renderTable(){
   }else{
     $('rows').innerHTML=list.map(p=>{
       const v=effective(p),gap=v.ca!==null&&v.pa!==null?v.pa-v.ca:null;
-      return `<tr data-uid="${es(p.uid)}" class="${selected===p.uid?'selected':''} ${changes[p.uid]?'pending':''}">
+      return `<tr data-uid="${es(p.uid)}" class="${selected===p.uid?'selected':''} ${draftFor(p.uid)?'pending':''}">
         <td><button type="button" class="profile-trigger" aria-haspopup="dialog">${es(v.name)}</button><div class="small-muted">${es(v.nation)}</div></td>
         <td>${show(v.club)}</td><td>${show(v.squad)}</td><td>${show(v.age)}</td><td>${show(v.position)}</td>
         <td class="number">${num(v.ca)}</td><td class="number gold">${num(v.pa)}</td>
@@ -416,7 +425,7 @@ detail.innerHTML=`
   <div class="detail-kpis"><div><label>Âge</label><b>${show(v.age)}</b></div><div><label>CA / 200</label><b class="mint">${num(v.ca)}</b></div><div><label>PA / 200</label><b class="gold">${num(v.pa)}</b></div></div>
   ${financialFacts.length?`<dl class="profile-finances">${financialFacts.join('')}</dl>`:''}
   <div class="small-muted">Progression théorique : <strong>${gap===null?'inconnue':(gap>0?'+':'')+gap+' points'}</strong></div>
-  ${localToken?'':'<p class="editor-hint">Ouvre une sauvegarde locale pour enregistrer les modifications.</p>'}
+  ${localToken||consultationOnly()?'':'<p class="editor-hint">Ouvre une sauvegarde locale pour enregistrer les modifications.</p>'}
   <div class="detail-actions"><button id="fav" class="btn btn-gold" type="button">${shortlist.has(p.uid)?'★ Retirer':'☆ Ajouter'}</button><button id="compare" class="btn btn-outline" type="button">Comparer</button></div>
   <div class="section-head">CAPACITÉS</div>
   <div class="edit-abilities"><label>Capacité actuelle (CA)<input data-ability="ca" type="number" min="${p.isStaff?1:0}" max="200" value="${v.ca??''}" placeholder="Inconnue"></label><label>Potentiel (PA)<input data-ability="pa" type="number" min="${p.isStaff?1:0}" max="200" value="${v.pa??''}" placeholder="Inconnue"></label></div>
@@ -432,8 +441,9 @@ if(!p.isStaff&&infoGrid){
 if(!availableTabs.some(([id])=>id===editorTab))editorTab='attributs';
 const navigation=document.createElement('nav');navigation.className='editor-tabs';navigation.setAttribute('aria-label','Rubriques de la fiche');navigation.innerHTML=availableTabs.map(([id,label])=>`<button type="button" class="btn btn-outline ${editorTab===id?'active':''}" data-editor-tab="${id}" aria-pressed="${editorTab===id}">${label}</button>`).join('');detail.querySelector('.edit-abilities').after(navigation);
 const selectTab=id=>{editorTab=id;navigation.querySelectorAll('button').forEach(button=>{let active=button.dataset.editorTab===id;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active))});detail.querySelectorAll('.attr-group').forEach(group=>{let section=['positions','traits','infos'].includes(group.dataset.group)?group.dataset.group:'attributs';group.classList.toggle('hidden',section!==id);if(section===id&&id!=='attributs'){group.open=true;openAttributeGroups.add(id)}});const headers=detail.querySelectorAll('.section-head');if(headers[1])headers[1].classList.toggle('hidden',id!=='attributs')};navigation.querySelectorAll('button').forEach(button=>button.addEventListener('click',()=>selectTab(button.dataset.editorTab)));selectTab(editorTab);
-const patch=changes[p.uid]||{},fieldCount=Object.values(patch).reduce((n,x)=>n+(x&&typeof x==='object'?Object.keys(x).length:1),0);
-$('profileChanges').textContent=fieldCount?`${fieldCount} modification${fieldCount>1?'s':''} sur cette fiche`:'Aucune modification sur cette fiche';
+const patch=draftFor(p.uid)||{},fieldCount=Object.values(patch).reduce((n,x)=>n+(x&&typeof x==='object'?Object.keys(x).length:1),0);
+$('profileChanges').textContent=consultationOnly()?'Consultation seule':fieldCount?`${fieldCount} modification${fieldCount>1?'s':''} sur cette fiche`:'Aucune modification sur cette fiche';
+if(consultationOnly())detail.querySelectorAll('input').forEach(input=>{input.disabled=true});
 updateSaveButton();
 detail.querySelectorAll('[data-ability]').forEach(el=>el.classList.toggle('changed',Object.hasOwn(patch,el.dataset.ability)));detail.querySelectorAll('[data-info]').forEach(el=>el.closest('.attr').classList.toggle('changed',Object.hasOwn(patch,el.dataset.info)));detail.querySelectorAll('[data-trait]').forEach(el=>el.closest('.attr').classList.toggle('changed',Object.hasOwn(patch.traits||{},el.dataset.trait)));
 const birthInput=$('birthDate');if(birthInput){birthInput.closest('.attr').classList.toggle('changed',Object.hasOwn(patch,'birth_date'));birthInput.addEventListener('change',()=>{if(!birthInput.value||!birthInput.validity.valid){notify('Choisis une date de naissance valide avant la date de la partie.',true);renderDetail();return}let cur=changes[p.uid]||{};if(birthInput.value===p.birth_date)delete cur.birth_date;else cur.birth_date=birthInput.value;if(Object.keys(cur).length)changes[p.uid]=cur;else delete changes[p.uid];persist();apply()})}
@@ -454,10 +464,10 @@ if(valueInput){
   });
 }
 $('detail').querySelectorAll('[data-ability]').forEach(el=>el.addEventListener('change',()=>edit(selected,el.dataset.ability,null,el.value)));
-$('detail').querySelectorAll('[data-attr]').forEach(el=>{el.closest('.attr').classList.toggle('changed',Object.hasOwn(changes[p.uid]?.attrs||{},el.dataset.attr));el.addEventListener('change',()=>edit(selected,'attrs',el.dataset.attr,el.value))});
-$('detail').querySelectorAll('[data-role]').forEach(el=>{el.closest('.attr').classList.toggle('changed',Object.hasOwn(changes[p.uid]?.roles||{},el.dataset.role));el.addEventListener('change',()=>edit(selected,'roles',el.dataset.role,el.value))});
-$('detail').querySelectorAll('[data-personality]').forEach(el=>{el.closest('.attr').classList.toggle('changed',Object.hasOwn(changes[p.uid]?.personality||{},el.dataset.personality));el.addEventListener('change',()=>edit(selected,'personality',el.dataset.personality,el.value))});
-$('detail').querySelectorAll('[data-position-rating]').forEach(el=>{el.closest('.attr').classList.toggle('changed',Object.hasOwn(changes[p.uid]?.positions_ratings||{},el.dataset.positionRating));el.addEventListener('change',()=>edit(selected,'positions_ratings',el.dataset.positionRating,el.value))});
+$('detail').querySelectorAll('[data-attr]').forEach(el=>{el.closest('.attr').classList.toggle('changed',Object.hasOwn(patch.attrs||{},el.dataset.attr));el.addEventListener('change',()=>edit(selected,'attrs',el.dataset.attr,el.value))});
+$('detail').querySelectorAll('[data-role]').forEach(el=>{el.closest('.attr').classList.toggle('changed',Object.hasOwn(patch.roles||{},el.dataset.role));el.addEventListener('change',()=>edit(selected,'roles',el.dataset.role,el.value))});
+$('detail').querySelectorAll('[data-personality]').forEach(el=>{el.closest('.attr').classList.toggle('changed',Object.hasOwn(patch.personality||{},el.dataset.personality));el.addEventListener('change',()=>edit(selected,'personality',el.dataset.personality,el.value))});
+$('detail').querySelectorAll('[data-position-rating]').forEach(el=>{el.closest('.attr').classList.toggle('changed',Object.hasOwn(patch.positions_ratings||{},el.dataset.positionRating));el.addEventListener('change',()=>edit(selected,'positions_ratings',el.dataset.positionRating,el.value))});
 $('detail').querySelectorAll('[data-trait]').forEach(el=>el.addEventListener('change',()=>{let key=el.dataset.trait,cur=changes[p.uid]||{};cur.traits={...(cur.traits||{})};if(el.checked===!!p.traits[key])delete cur.traits[key];else cur.traits[key]=el.checked;if(!Object.keys(cur.traits).length)delete cur.traits;if(Object.keys(cur).length)changes[p.uid]=cur;else delete changes[p.uid];persist();apply()}));
 $('detail').querySelectorAll('[data-info]').forEach(el=>el.addEventListener('change',()=>{let key=el.dataset.info,value=Number(el.value),min=Number(el.min),max=Number(el.max);if(el.value===''||!Number.isInteger(value)||value<min||value>max){notify(`Valeur attendue entre ${min} et ${max}.`,true);renderDetail();return}let cur=changes[p.uid]||{};if(value===p[key])delete cur[key];else cur[key]=value;if(Object.keys(cur).length)changes[p.uid]=cur;else delete changes[p.uid];persist();apply()}));
 $('detail').querySelectorAll('.attr-group').forEach(el=>el.addEventListener('toggle',()=>{if(!el.isConnected)return;if(el.open)openAttributeGroups.add(el.dataset.group);else openAttributeGroups.delete(el.dataset.group)}));
@@ -504,6 +514,8 @@ $('detail').addEventListener('keydown',ev=>{
 });
 $('detailSave').addEventListener('click',()=>$('saveEdits').click());
 $('detailReset').addEventListener('click',()=>{delete changes[selected];persist();apply()});
+$('saveMode').addEventListener('change',()=>{$('detailSaveMode').value=$('saveMode').value});
+$('detailSaveMode').addEventListener('change',()=>{$('saveMode').value=$('detailSaveMode').value});
 $('modePlayers').addEventListener('click',()=>switchMode('players'));
 $('modeStaff').addEventListener('click',()=>{if(staffRecords.length)switchMode('staff')});
 $('currency').addEventListener('change',()=>{
@@ -542,6 +554,7 @@ $('exportEdits').addEventListener('click',()=>{let patches=Object.entries(change
 let lastSummary=null;
 function showSaveMetadata(data){
   lastSummary=data;
+  $('exportEdits').disabled=consultationOnly();
   const warning=data?.compatibility_warning||'';
   for(const id of ['saveBuildWarning','profileBuildWarning']){
     const banner=$(id);
@@ -588,19 +601,26 @@ async function receive(file){
       staffRoleOrder=Array.isArray(data.staff_role_order)?data.staff_role_order:[];
       
       $('genderFilter').value=data.coverage?'male':'';
-      setPlayers(data.players||[],data.source||file.name,data.staff||[]);
       showSaveMetadata(data);
+      setPlayers(data.players||[],data.source||file.name,data.staff||[]);
       if(data.coverage)notify(`${Number(data.coverage.men||0).toLocaleString('fr-FR')} hommes affichés par défaut. Choisis « Tous les joueurs » ou « Femmes » dans le filtre Genre pour changer la liste.`);
       else notify(data.note||'Catalogue des joueurs indisponible.',true);
     }else throw Error('Format inconnu : importe un .fm, .zip, .json ou .csv.');
   }catch(err){notify(String(err.message||err),true);$('status').textContent='● Erreur de lecture'}
   finally{$('status').classList.remove('spinning');$('file').value=''}
 }
+function addSaveChoice(select,path){
+  if([...select.options].some(option=>option.value===path))return;
+  const option=document.createElement('option');
+  option.value=path;
+  option.textContent=path.split(/[\\/]/).pop();
+  select.appendChild(option);
+}
 async function loadSaveChoices(){
   try{
     const response=await fetch('/api/sauvegardes');const data=await response.json();
     const select=$('localSave');select.innerHTML='';
-    for(const path of data.saves||[]){const option=document.createElement('option');option.value=path;option.textContent=path.split(/[\\/]/).pop();select.appendChild(option)}
+    for(const path of data.saves||[])addSaveChoice(select,path);
     if(!select.options.length){const option=document.createElement('option');option.value='';option.textContent='Aucune sauvegarde trouvée dans '+(data.folder||'games');select.appendChild(option)}
     const preferred=[...select.options].find(x=>x.textContent==='Binbin Carpenter - Pau FC.fm');if(preferred)select.value=preferred.value;
   }catch{notify('Liste des sauvegardes indisponible.',true)}
@@ -611,28 +631,44 @@ $('openLocal').addEventListener('click',async()=>{
   try{
     const response=await fetch('/api/ouvrir-local',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({path})});
     const data=await response.json();if(!response.ok)throw Error([data.error||'Ouverture impossible',data.compatibility_warning].filter(Boolean).join(' '));
-    playerChanges={};staffChanges={};changes=currentMode==='staff'?staffChanges:playerChanges;persist();localToken=data.token;localOpenedPath=data.path;
+    localToken=data.write_allowed?data.token:'';
+    localOpenedPath=data.path;
+    $('saveMode').value=$('detailSaveMode').value='copy';
+    if(data.write_allowed){
+      playerChanges={};staffChanges={};changes=currentMode==='staff'?staffChanges:playerChanges;persist();
+    }
     const summary=data.summary;configureCurrency(summary.euro_rate,true);fmAttributeOrder=summary.attribute_order||[];staffAttributeOrder=summary.staff_attribute_order||[];staffRoleOrder=summary.staff_role_order||[];$('genderFilter').value='male';
-    setPlayers(summary.players||[],summary.source||path,summary.staff||[]);showSaveMetadata(summary);
-    $('localPath').textContent='Fichier à modifier : '+data.path;updateSaveButton();
-    notify('Partie locale ouverte. Modifie les stats dans une fiche puis clique sur Enregistrer les stats.');
+    showSaveMetadata(summary);
+    setPlayers(summary.players||[],summary.source||path,summary.staff||[]);
+    $('localPath').textContent=(data.write_allowed?'Fichier ouvert · ':'Consultation seule · ')+data.path;
+    updateSaveButton();
+    if(!summary.coverage)notify(summary.note||'Catalogue des joueurs indisponible.',true);
+    else notify(data.write_allowed?'Partie ouverte. Les modifications seront enregistrées dans un nouveau fichier par défaut.':'Partie ouverte en consultation seule.');
   }catch(error){localToken='';localOpenedPath='';updateSaveButton();notify(String(error.message||error),true)}
   finally{$('openLocal').disabled=false}
 });
 $('localSave').addEventListener('change',()=>{
   updateSaveButton();
-  $('localPath').textContent=localOpenedPath?$('localSave').value===localOpenedPath?'Fichier à modifier : '+localOpenedPath:'Partie affichée : '+localOpenedPath+' · Ouvre la nouvelle sélection pour la modifier.':'';
+  $('localPath').textContent=localOpenedPath?$('localSave').value===localOpenedPath?(localToken?'Fichier ouvert · ':'Consultation seule · ')+localOpenedPath:'Partie affichée · '+localOpenedPath+' · Ouvre la nouvelle sélection pour la consulter.':'';
 });
 $('saveEdits').addEventListener('click',async()=>{
   const edits=pendingEdits();if(saveInProgress||!localToken||!edits.length||$('localSave').value!==localOpenedPath)return;
-  const saveMode=currentMode,saveById=byId,saveChanges=changes;
+  const savePeople=currentMode,saveById=byId,saveChanges=changes,mode=$('saveMode').value;
   saveInProgress=true;updateSaveButton();$('modePlayers').disabled=true;$('modeStaff').disabled=true;$('openLocal').disabled=true;$('localSave').disabled=true;
   try{
-    const endpoint=saveMode==='staff'?'/api/enregistrer-staff':'/api/enregistrer';
-    const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:localToken,edits})});
-    const data=await response.json();if(!response.ok)throw Error(data.error||'Écriture impossible');
+    const endpoint=savePeople==='staff'?'/api/enregistrer-staff':'/api/enregistrer';
+    const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:localToken,mode,edits})});
+    const data=await response.json();
+    const backup=data.backup_path?'Copie de secours · '+data.backup_path:'';
+    if(!response.ok)throw Error([data.error||'Écriture impossible',backup].filter(Boolean).join(' · '));
+    const select=$('localSave');
+    if(data.backup_path)addSaveChoice(select,data.backup_path);
+    addSaveChoice(select,data.path);
+    select.value=localOpenedPath=data.path;
+    $('localPath').textContent=['Fichier ouvert · '+data.path,backup].filter(Boolean).join(' · ');
+    $('status').textContent='● '+select.selectedOptions[0].textContent;
     for(const patch of edits){const player=saveById.get(String(patch.uid));if(!player)continue;ensureAttributes(player);if(patch.ca!==undefined)player.ca=patch.ca;if(patch.pa!==undefined)player.pa=patch.pa;if(patch.value!==undefined)player.value=patch.value;if(patch.birth_date!==undefined){player.birth_date=patch.birth_date;player.age=ageFromBirth(patch.birth_date,lastSummary?.game_date)}Object.assign(player.attrs,patch.attrs||{});Object.assign(player.personality,patch.personality||{});Object.assign(player.positions_ratings,patch.positions_ratings||{});Object.assign(player.traits,patch.traits||{});for(const field of ["height","home_rep","current_rep","world_rep"])if(patch[field]!==undefined)player[field]=patch[field];if(player.isStaff)Object.assign(player.roles,patch.roles||{});delete saveChanges[String(patch.uid)]}
-    persist();refreshFinancialSearch();apply();notify(`${data.changed} valeur(s) enregistrée(s) dans ${localOpenedPath}. Recharge cette partie dans FM27 pour les voir.`);
+    persist();refreshFinancialSearch();apply();notify(`${data.changed} valeur(s) enregistrée(s) dans ${data.path}. Ouvre ce fichier dans FM27. ${backup}`.trim());
   }catch(error){notify(String(error.message||error),true)}
   finally{saveInProgress=false;$('modePlayers').disabled=false;$('modeStaff').disabled=!staffRecords.length;$('openLocal').disabled=false;$('localSave').disabled=false;updateSaveButton()}
 });

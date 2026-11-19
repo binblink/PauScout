@@ -242,7 +242,7 @@ func staffIdentity(data []byte, h staffHeader, closing int, id uint32, employmen
 	return findPersonIdentity(data, h.at+13, closing, pools, id)
 }
 
-func readStaffCatalogData(data []byte, pools namePools, clock time.Time, teams map[uint32]teamInfo, countries map[uint32]string, leagues map[uint32]string, squads map[uint32]string) []CatalogStaff {
+func readStaffCatalogData(data []byte, pools namePools, clock time.Time, teams map[uint32]teamInfo, countries map[uint32]string, leagues map[uint32]string, squads map[uint32]string, layout map[uint32]recordOffsets) []CatalogStaff {
 	result := make([]CatalogStaff, 0, 16_000)
 	seen := make(map[uint32]bool)
 	for pos := 12; pos < len(data); {
@@ -289,8 +289,16 @@ func readStaffCatalogData(data []byte, pools namePools, clock time.Time, teams m
 		} else {
 			staff.Gender = "male"
 		}
-		if roles, _ := staffRoles(data, h, closing); roles != nil {
+		roles, rolesAt := staffRoles(data, h, closing)
+		if roles != nil {
 			staff.RolesB64 = roles
+		}
+		if layout != nil {
+			offsets := recordOffsets{Closing: closing - h.ability, Birth: identity.personalityOffset - 22 - h.ability}
+			if roles != nil {
+				offsets.Roles = rolesAt - h.ability
+			}
+			layout[id] = offsets
 		}
 		result = append(result, staff)
 		seen[id] = true
