@@ -28,7 +28,7 @@ import (
 var website embed.FS
 
 const (
-	appVersion = "0.14.1"
+	appVersion = "0.14.2"
 	maxUpload  = 800 << 20
 	maxSave    = 1400 << 20
 )

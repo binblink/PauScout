@@ -6,8 +6,7 @@
 <title>PauScout FM27 — éditeur de joueurs et de staff</title>
 <style>
 :root{color-scheme:dark;--bg:#0b0f16;--panel:#141b25;--panel2:#1b2632;--stroke:#293747;--txt:#e9f3f7;--muted:#93a6b5;--gold:#f8c75b;--mint:#65d7b2;--red:#ff818b;--blue:#8fbfff;--side:288px}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(70vw 35vw at 75% -5%,#20312d 0,transparent 72%),var(--bg);color:var(--txt);font:14px/1.5 system-ui,-apple-system,'Segoe UI',sans-serif}button,input,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}a{color:var(--mint)}.shell{min-height:100vh;display:grid;grid-template-columns:var(--side) minmax(0,1fr)}.sidebar{background:#0e151d;border-right:1px solid var(--stroke);padding:26px 18px;display:flex;flex-direction:column;gap:20px}.brand{display:flex;align-items:center;gap:10px;padding:0 8px}.logo{width:41px;height:41px;display:grid;place-items:center;background:linear-gradient(135deg,#ffe27b,#caa443);color:#132015;border-radius:13px;font-size:23px;font-weight:950}.brandname{font-weight:850;letter-spacing:.3px;font-size:21px}.brandname span{color:var(--gold)}.micro{color:var(--muted);font-size:11px;letter-spacing:.7px;text-transform:uppercase}.side-title{color:var(--muted);font-size:11px;letter-spacing:1.7px;text-transform:uppercase;font-weight:750;margin:0 0 11px}.sidebar section{border-top:1px solid #23303d;padding-top:20px}.field{margin:12px 0}.field label{display:block;color:#b6c6d2;font-size:12px;margin-bottom:6px}.control,input[type=search],input[type=number],select{display:block;width:100%;border:1px solid var(--stroke);border-radius:9px;background:#0e1620;color:var(--txt);padding:10px 11px;outline:none;min-width:0}input:focus,select:focus{border-color:#67cdb0;box-shadow:0 0 0 2px #65d7b222}.inline-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}.sidebar button{width:100%}.btn{border:1px solid var(--stroke);border-radius:9px;padding:10px 13px;background:#213140;color:var(--txt);font-weight:650}.btn:hover{border-color:#617588}.btn-primary{background:var(--mint);color:#0b2821;border-color:var(--mint)}.btn-primary:hover{filter:brightness(1.08)}.btn-outline{background:transparent}.btn-gold{background:var(--gold);color:#35270a;border-color:var(--gold)}.note{color:var(--muted);font-size:12px}.side-footer{margin-top:auto;font-size:11px;color:#8094a4;padding:12px 8px}.main{min-width:0;padding:28px clamp(17px,3vw,44px);max-width:1700px;width:100%;margin:0 auto;align-self:start}.topline{display:flex;justify-content:space-between;gap:20px;align-items:start;flex-wrap:wrap}.top-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.title{font-size:31px;letter-spacing:-1.1px;line-height:1.2;font-weight:830;margin:5px 0 5px}.title b{color:var(--gold)}.subtitle{margin:0;color:var(--muted)}.live{font-size:12px;color:var(--mint);border:1px solid #326a57;padding:6px 10px;border-radius:100px;background:#122820;white-space:nowrap}.hero{display:grid;grid-template-columns:minmax(0,1fr) 275px;gap:17px;margin:26px 0 20px}.drop{border:1px dashed #526e6e;border-radius:14px;background:linear-gradient(100deg,#192923,#17202c);padding:23px 25px;min-height:144px;display:flex;gap:17px;align-items:center;cursor:pointer;transition:.15s}.drop:hover,.drop.over{border-color:var(--mint);background:#1c322c}.upload-circle{height:49px;width:49px;background:#2a443c;border-radius:12px;display:grid;place-items:center;font-size:24px;flex:none}.drop h3{font-size:16px;margin:0 0 4px}.drop p{margin:0;color:#b7c8c8;font-size:12px;line-height:1.6}.drop strong{color:#f7df98}.preview{border:1px solid var(--stroke);border-radius:14px;background:#141e29;padding:18px 19px}.preview h4{margin:0 0 12px;font-size:13px;color:#d0e0e7}.preview p{margin:4px 0;font-size:12px;color:var(--muted)}.preview p strong{float:right;color:#cce4e2}.toast{margin:0 0 18px;padding:11px 14px;border-radius:9px;background:#1b2d36;color:#c8edf0;border:1px solid #38525c;display:none}.toast.error{display:block;background:#301c25;border-color:#67414a;color:#ffb1ba}.toast.info{display:block}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0 21px}.stat{border:1px solid var(--stroke);border-radius:13px;padding:16px;background:var(--panel)}.stat .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}.stat .v{font-weight:820;font-size:28px;margin:6px 0 1px;letter-spacing:-.7px}.stat small{font-size:11px;color:#96b9a9}.workarea{display:grid;grid-template-columns:minmax(0,1fr) 345px;gap:14px;align-items:start}.panel{background:var(--panel);border:1px solid var(--stroke);border-radius:14px;min-width:0;overflow:hidden}.panel-top{padding:16px 19px;border-bottom:1px solid var(--stroke);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.panel-top h3{font-size:17px;margin:0}.toolbar{display:flex;gap:8px;align-items:center}.toolbar select{font-size:12px;max-width:156px;padding:8px}.badge{display:inline-flex;font-size:11px;padding:3px 8px;border-radius:6px;background:#283c40;color:#9ce9d2}.table-wrap{overflow-x:auto;max-height:700px;min-height:360px;overflow-y:auto}table{width:100%;border-collapse:collapse;white-space:nowrap;min-width:655px}thead{position:sticky;top:0;background:#1b2631;z-index:1}th{text-transform:uppercase;text-align:left;font-size:10px;color:#a3b4c1;letter-spacing:.8px;font-weight:760;padding:13px 13px;border-bottom:1px solid #30414c}td{font-size:12px;color:#dce5eb;padding:12px 13px;border-bottom:1px solid #202e3b}td strong{font-size:12px}tbody tr{cursor:pointer}tbody tr:hover{background:#21313c}tbody tr.selected{background:#243f3a}.small-muted{color:#859ba9;font-size:11px}.number{font-weight:760;font-variant-numeric:tabular-nums}.gold{color:var(--gold)}.mint{color:var(--mint)}.empty{padding:64px 28px;text-align:center;color:#9db0bd}.empty h3{color:#dce8ec;margin:8px 0}.footer-table{border-top:1px solid var(--stroke);padding:12px 17px;display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--muted);font-size:12px}.pager{display:flex;align-items:center;gap:9px}.pager button{padding:6px 10px}.details{padding:20px;min-height:530px}.person-head{display:flex;align-items:center;gap:12px}.avatar{height:52px;width:52px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(135deg,#396a5c,#254359);font-size:23px;color:#eff9e8;font-weight:850}.pname{font-size:20px;font-weight:800;line-height:1.3;overflow-wrap:anywhere}.pos{color:#91acb9;margin-top:3px;font-size:12px}.detail-kpis{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin:22px 0}.detail-kpis>div{background:#1c2a36;border:1px solid #2b3b47;border-radius:9px;padding:12px 8px;text-align:center}.detail-kpis label{display:block;color:#93a9b8;font-size:10px}.detail-kpis b{font-size:21px;display:block;margin-top:2px}.skill-bar{height:5px;background:#2b3b46;border-radius:20px;margin-top:5px;overflow:hidden}.skill-bar i{display:block;background:var(--mint);height:100%;border-radius:20px}.edit-status{font-size:11px;padding:10px;background:#2b251a;border:1px solid #5f4c2d;color:#f2d697;border-radius:8px;margin:13px 0}.section-head{display:flex;justify-content:space-between;align-items:center;margin:19px 0 10px;font-size:12px;font-weight:800;color:#d9e8e8;letter-spacing:.4px}.attr-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.attr{background:#1b2935;border:1px solid #2b3a46;border-radius:7px;padding:9px 10px;display:flex;justify-content:space-between;align-items:center;gap:6px}.attr label{font-size:11px;color:#bac9d3;overflow-wrap:anywhere}.attr input{width:48px;text-align:center;padding:5px 3px;min-width:0;font-weight:800;color:var(--mint);background:#0e1c26;border:1px solid #314b4e}.edit-abilities{display:grid;grid-template-columns:1fr 1fr;gap:8px}.edit-abilities label{font-size:11px;color:var(--muted)}.edit-abilities input{margin-top:6px}.detail-actions{display:flex;gap:8px;margin-top:19px;flex-wrap:wrap}.detail-actions button{flex:1}.tagline{font-size:11px;color:var(--muted);margin:12px 0 0}.compare-box{margin:0 0 14px;padding:11px;border:1px solid #40645b;background:#1a302d;border-radius:9px;font-size:12px}.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}.hidden{display:none!important}.spinning{animation:pulse 1s infinite alternate}@keyframes pulse{to{opacity:.45}}@media(max-width:1250px){.workarea{grid-template-columns:1fr}.details{min-height:180px}.details .attr-grid{grid-template-columns:repeat(3,1fr)}}@media(max-width:900px){.shell{grid-template-columns:1fr}.sidebar{border-bottom:1px solid var(--stroke);border-right:0;display:grid;grid-template-columns:1fr 1fr;align-items:start;gap:15px}.brand{grid-column:1/-1}.sidebar section{padding-top:12px}.side-footer{display:none}.main{padding:22px 16px}.hero{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}@media(max-width:540px){.sidebar{grid-template-columns:1fr}.title{font-size:26px}.drop{padding:18px;align-items:start}.preview{display:none}.details .attr-grid{grid-template-columns:1fr 1fr}.stats{gap:8px}.stat .v{font-size:24px}}
-@media(min-width:1251px){.workarea{grid-template-columns:minmax(0,1fr) minmax(430px,520px)}}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(70vw 35vw at 75% -5%,#20312d 0,transparent 72%),var(--bg);color:var(--txt);font:14px/1.5 system-ui,-apple-system,'Segoe UI',sans-serif}button,input,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}a{color:var(--mint)}.shell{min-height:100vh;display:grid;grid-template-columns:var(--side) minmax(0,1fr)}.sidebar{background:#0e151d;border-right:1px solid var(--stroke);padding:26px 18px;display:flex;flex-direction:column;gap:20px}.brand{display:flex;align-items:center;gap:10px;padding:0 8px}.logo{width:41px;height:41px;display:grid;place-items:center;background:linear-gradient(135deg,#ffe27b,#caa443);color:#132015;border-radius:13px;font-size:23px;font-weight:950}.brandname{font-weight:850;letter-spacing:.3px;font-size:21px}.brandname span{color:var(--gold)}.micro{color:var(--muted);font-size:11px;letter-spacing:.7px;text-transform:uppercase}.side-title{color:var(--muted);font-size:11px;letter-spacing:1.7px;text-transform:uppercase;font-weight:750;margin:0 0 11px}.sidebar section{border-top:1px solid #23303d;padding-top:20px}.field{margin:12px 0}.field label{display:block;color:#b6c6d2;font-size:12px;margin-bottom:6px}.control,input[type=search],input[type=number],select{display:block;width:100%;border:1px solid var(--stroke);border-radius:9px;background:#0e1620;color:var(--txt);padding:10px 11px;outline:none;min-width:0}input:focus,select:focus{border-color:#67cdb0;box-shadow:0 0 0 2px #65d7b222}.inline-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}.sidebar button{width:100%}.btn{border:1px solid var(--stroke);border-radius:9px;padding:10px 13px;background:#213140;color:var(--txt);font-weight:650}.btn:hover{border-color:#617588}.btn-primary{background:var(--mint);color:#0b2821;border-color:var(--mint)}.btn-primary:hover{filter:brightness(1.08)}.btn-outline{background:transparent}.btn-gold{background:var(--gold);color:#35270a;border-color:var(--gold)}.note{color:var(--muted);font-size:12px}.side-footer{margin-top:auto;font-size:11px;color:#8094a4;padding:12px 8px}.main{min-width:0;padding:28px clamp(17px,3vw,44px);max-width:1700px;width:100%;margin:0 auto;align-self:start}.topline{display:flex;justify-content:space-between;gap:20px;align-items:start;flex-wrap:wrap}.top-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.title{font-size:31px;letter-spacing:-1.1px;line-height:1.2;font-weight:830;margin:5px 0 5px}.title b{color:var(--gold)}.subtitle{margin:0;color:var(--muted)}.live{font-size:12px;color:var(--mint);border:1px solid #326a57;padding:6px 10px;border-radius:100px;background:#122820;white-space:nowrap}.hero{display:grid;grid-template-columns:minmax(0,1fr) 275px;gap:17px;margin:26px 0 20px}.drop{border:1px dashed #526e6e;border-radius:14px;background:linear-gradient(100deg,#192923,#17202c);padding:23px 25px;min-height:144px;display:flex;gap:17px;align-items:center;cursor:pointer;transition:.15s}.drop:hover,.drop.over{border-color:var(--mint);background:#1c322c}.upload-circle{height:49px;width:49px;background:#2a443c;border-radius:12px;display:grid;place-items:center;font-size:24px;flex:none}.drop h3{font-size:16px;margin:0 0 4px}.drop p{margin:0;color:#b7c8c8;font-size:12px;line-height:1.6}.drop strong{color:#f7df98}.preview{border:1px solid var(--stroke);border-radius:14px;background:#141e29;padding:18px 19px}.preview h4{margin:0 0 12px;font-size:13px;color:#d0e0e7}.preview p{margin:4px 0;font-size:12px;color:var(--muted)}.preview p strong{float:right;color:#cce4e2}.toast{margin:0 0 18px;padding:11px 14px;border-radius:9px;background:#1b2d36;color:#c8edf0;border:1px solid #38525c;display:none}.toast.error{display:block;background:#301c25;border-color:#67414a;color:#ffb1ba}.toast.info{display:block}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0 21px}.stat{border:1px solid var(--stroke);border-radius:13px;padding:16px;background:var(--panel)}.stat .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}.stat .v{font-weight:820;font-size:28px;margin:6px 0 1px;letter-spacing:-.7px}.stat small{font-size:11px;color:#96b9a9}.panel{background:var(--panel);border:1px solid var(--stroke);border-radius:14px;min-width:0;overflow:hidden}.panel-top{padding:16px 19px;border-bottom:1px solid var(--stroke);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.panel-top h3{font-size:17px;margin:0}.toolbar{display:flex;gap:8px;align-items:center}.toolbar select{font-size:12px;max-width:156px;padding:8px}.badge{display:inline-flex;font-size:11px;padding:3px 8px;border-radius:6px;background:#283c40;color:#9ce9d2}.table-wrap{overflow-x:auto;max-height:700px;min-height:360px;overflow-y:auto}table{width:100%;border-collapse:collapse;white-space:nowrap;min-width:655px}thead{position:sticky;top:0;background:#1b2631;z-index:1}th{text-transform:uppercase;text-align:left;font-size:10px;color:#a3b4c1;letter-spacing:.8px;font-weight:760;padding:13px 13px;border-bottom:1px solid #30414c}td{font-size:12px;color:#dce5eb;padding:12px 13px;border-bottom:1px solid #202e3b}td strong{font-size:12px}tbody tr{cursor:pointer}tbody tr:hover{background:#21313c}tbody tr.selected{background:#243f3a}.small-muted{color:#859ba9;font-size:11px}.number{font-weight:760;font-variant-numeric:tabular-nums}.gold{color:var(--gold)}.mint{color:var(--mint)}.empty{padding:64px 28px;text-align:center;color:#9db0bd}.empty h3{color:#dce8ec;margin:8px 0}.footer-table{border-top:1px solid var(--stroke);padding:12px 17px;display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--muted);font-size:12px}.pager{display:flex;align-items:center;gap:9px}.pager button{padding:6px 10px}.person-head{display:flex;align-items:center;gap:12px}.avatar{height:52px;width:52px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(135deg,#396a5c,#254359);font-size:23px;color:#eff9e8;font-weight:850}.pname{font-size:20px;font-weight:800;line-height:1.3;overflow-wrap:anywhere}.pos{color:#91acb9;margin-top:3px;font-size:12px}.detail-kpis{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin:22px 0}.detail-kpis>div{background:#1c2a36;border:1px solid #2b3b47;border-radius:9px;padding:12px 8px;text-align:center}.detail-kpis label{display:block;color:#93a9b8;font-size:10px}.detail-kpis b{font-size:21px;display:block;margin-top:2px}.skill-bar{height:5px;background:#2b3b46;border-radius:20px;margin-top:5px;overflow:hidden}.skill-bar i{display:block;background:var(--mint);height:100%;border-radius:20px}.section-head{display:flex;justify-content:space-between;align-items:center;margin:19px 0 10px;font-size:12px;font-weight:800;color:#d9e8e8;letter-spacing:.4px}.attr-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.attr{background:#1b2935;border:1px solid #2b3a46;border-radius:7px;padding:9px 10px;display:flex;justify-content:space-between;align-items:center;gap:6px}.attr label{font-size:11px;color:#bac9d3;overflow-wrap:anywhere}.attr input{width:48px;text-align:center;padding:5px 3px;min-width:0;font-weight:800;color:var(--mint);background:#0e1c26;border:1px solid #314b4e}.edit-abilities{display:grid;grid-template-columns:1fr 1fr;gap:8px}.edit-abilities label{font-size:11px;color:var(--muted)}.edit-abilities input{margin-top:6px}.detail-actions{display:flex;gap:8px;margin-top:19px;flex-wrap:wrap}.detail-actions button{flex:1}.tagline{font-size:11px;color:var(--muted);margin:12px 0 0}.compare-box{margin:0 0 14px;padding:11px;border:1px solid #40645b;background:#1a302d;border-radius:9px;font-size:12px}.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}.hidden{display:none!important}.spinning{animation:pulse 1s infinite alternate}@keyframes pulse{to{opacity:.45}}@media(max-width:900px){.shell{grid-template-columns:1fr}.sidebar{border-bottom:1px solid var(--stroke);border-right:0;display:grid;grid-template-columns:1fr 1fr;align-items:start;gap:15px}.brand{grid-column:1/-1}.sidebar section{padding-top:12px}.side-footer{display:none}.main{padding:22px 16px}.hero{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}@media(max-width:540px){.sidebar{grid-template-columns:1fr}.title{font-size:26px}.drop{padding:18px;align-items:start}.preview{display:none}.stats{gap:8px}.stat .v{font-size:24px}}
 .attr-group{border:1px solid var(--stroke);border-radius:10px;background:#17232e;margin:12px 0;overflow:hidden}
 .attr-group>summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;padding:11px 13px;font-size:12px;font-weight:750;color:#dcebe9;background:#1b2b35}
 .attr-group>summary::-webkit-details-marker{display:none}.attr-group>summary::after{content:'⌄';color:var(--mint);font-size:18px;line-height:1}.attr-group[open]>summary::after{transform:rotate(180deg)}
@@ -20,12 +19,42 @@
 .mode-switch{display:flex;gap:8px;margin:16px 0 8px}.mode-switch button{min-width:140px}.mode-switch button.active{background:#284d40;border-color:var(--mint);color:#dbffed}
 .search-attributes{border:1px solid var(--stroke);border-radius:9px;padding:10px;margin:12px 0;background:#17232e}.search-attributes>summary{cursor:pointer;color:#dcebe9;font-weight:700}.filter-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.filter-chip{display:inline-flex;align-items:center;gap:7px;border:1px solid #477765;background:#203a34;border-radius:7px;padding:5px 7px;font-size:11px}.filter-chip button{width:auto!important;padding:0 3px;background:none;border:0;color:#d5f8e9;font-size:16px}.filter-chip button:hover{color:#fff}
 body:not(.has-value) .finance-value,body:not(.has-wage) .finance-wage{display:none}
-.editor-tabs{display:flex;gap:6px;overflow-x:auto;padding:4px 0 10px;margin:12px 0;border-bottom:1px solid var(--stroke)}.editor-tabs button{white-space:nowrap;font-size:12px;padding:8px 10px}.editor-tabs button.active{background:#284d40;border-color:var(--mint);color:#e3fff1}.editor-save{display:flex;align-items:center;gap:8px;flex-wrap:wrap;position:sticky;bottom:0;z-index:3;background:#14232b;border:1px solid #385a50;border-radius:10px;padding:10px;margin:14px 0 0;box-shadow:0 -5px 16px #0004}.editor-save span{flex:1;min-width:115px;font-size:12px;color:#d7e8e3}.editor-save button{padding:8px 10px;font-size:12px}.attr-group .attr input[data-info]{width:82px}.attr-group .attr input[type=checkbox]{width:20px;height:20px;accent-color:#65d7b2;cursor:pointer}.attr-group .attr:has(input[type=checkbox]){cursor:pointer;align-items:center}.attr-group .attr span{font-size:12px;color:#cbdadf}.edit-abilities input.changed{border-color:#d6b85d;color:#f5d771}.editor-hint{font-size:11px;color:#96b9a9;margin:4px 0}.detail-actions{margin-bottom:14px}
+.editor-tabs{display:flex;gap:6px;overflow-x:auto;padding:4px 0 10px;margin:12px 0;border-bottom:1px solid var(--stroke)}.editor-tabs button{white-space:nowrap;font-size:12px;padding:8px 10px}.editor-tabs button.active{background:#284d40;border-color:var(--mint);color:#e3fff1}.editor-save{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#14232b;box-shadow:0 -5px 16px #0004}.editor-save span{flex:1;min-width:115px;font-size:12px;color:#d7e8e3}.editor-save button{padding:8px 10px;font-size:12px}.attr-group .attr input[data-info]{width:82px}.attr-group .attr input[type=checkbox]{width:20px;height:20px;accent-color:#65d7b2;cursor:pointer}.attr-group .attr:has(input[type=checkbox]){cursor:pointer;align-items:center}.attr-group .attr span{font-size:12px;color:#cbdadf}.edit-abilities input.changed{border-color:#d6b85d;color:#f5d771}.editor-hint{font-size:11px;color:#96b9a9;margin:4px 0}.detail-actions{margin-bottom:14px}
 .attr-group .birth-field{grid-column:1/-1}.attr-group .birth-field input{width:155px;color:var(--txt);color-scheme:dark;padding:7px;border-radius:6px;font:inherit}
-.attr-group .value-field{grid-column:1/-1}.attr-group .value-field input{width:155px;padding:7px;border-radius:6px;font:inherit}
-@media(max-width:1250px){.attr-group .attr-grid{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:720px){.attr-group .attr-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:480px){.attr-group .attr-grid{grid-template-columns:1fr}}
+.attr-group .value-field{grid-column:1/-1;flex-wrap:wrap}
+.attr-group .value-field input{width:min(100%, 195px);padding:8px;font:inherit;font-weight:750;text-align:right}
+.money-input,th.finance-value,th.finance-wage,td.finance-value,td.finance-wage{text-align:right;font-variant-numeric:tabular-nums}
+.profile-trigger{border:0;border-radius:4px;background:transparent;color:inherit;font-weight:750;padding:0;text-align:left}
+.profile-trigger:hover{color:var(--mint)}
+.profile-trigger:focus-visible,.profile-close:focus-visible{outline:2px solid var(--mint);outline-offset:3px}
+body:has(.profile-dialog[open]){overflow:hidden}
+.profile-dialog{position:fixed;inset:0;width:min(800px,calc(100% - 32px));max-width:none;max-height:calc(100dvh - 32px);margin:auto;padding:0;color:var(--txt);box-shadow:0 24px 80px #0009}
+.profile-dialog[open]{display:flex;flex-direction:column}
+.profile-dialog::backdrop{background:rgb(5 10 15 / 75%)}
+.profile-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex:none;padding:18px 22px;border-bottom:1px solid var(--stroke);background:#17242e}
+.profile-head .person-head{min-width:0}
+.profile-head .avatar{flex:none}
+.profile-head .pname{margin:0}
+.profile-head .pos{overflow-wrap:anywhere}
+.profile-close{flex:none;width:40px;height:40px;padding:0;font-size:25px;line-height:1}
+.profile-feedback{flex:none;margin:10px 20px 0}
+.profile-scroll{min-height:0;overflow:auto;overscroll-behavior:contain;padding:0 22px 18px}
+.profile-scroll .attr-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.profile-scroll .compare-box{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:14px 0 0}
+.profile-scroll .compare-box button{padding:3px 9px}
+.profile-finances{display:flex;flex-wrap:wrap;gap:8px 20px;margin:-10px 0 15px;padding:10px 12px;background:#192833;border:1px solid var(--stroke);border-radius:9px}
+.profile-finances div{display:flex;align-items:baseline;flex-wrap:wrap;gap:0 8px}
+.profile-finances dt{color:var(--muted);font-size:12px}
+.profile-finances dd{margin:0;font-size:15px;font-weight:760;font-variant-numeric:tabular-nums}
+.profile-dialog .editor-save{flex:none;padding:12px 22px;border-top:1px solid #385a50}
+@media(max-width:720px){.profile-scroll .attr-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){
+  .profile-dialog{width:calc(100% - 16px);max-height:calc(100dvh - 16px)}
+  .profile-head,.profile-dialog .editor-save{padding:12px}
+  .profile-scroll{padding:0 12px 14px}
+  .profile-scroll .attr-grid{grid-template-columns:1fr}
+  .profile-feedback{margin:8px 12px 0}
+}
 </style>
 </head>
 <body>
@@ -50,8 +79,8 @@ body:not(.has-value) .finance-value,body:not(.has-wage) .finance-wage{display:no
     <div class="field"><label>Capacité actuelle (CA)</label><div class="inline-fields"><input aria-label="CA minimum" id="caMin" type="number" min="0" max="200" placeholder="Min"/><input aria-label="CA maximum" id="caMax" type="number" min="0" max="200" placeholder="Max"/></div></div>
     <div class="field"><label>Potentiel (PA)</label><div class="inline-fields"><input aria-label="PA minimum" id="paMin" type="number" min="0" max="200" placeholder="Min"/><input aria-label="PA maximum" id="paMax" type="number" min="0" max="200" placeholder="Max"/></div></div>
     <div class="field"><label for="currency">Devise des valeurs</label><select id="currency"><option value="EUR">Euro (€)</option><option value="GBP">Livre sterling (£)</option></select></div>
-    <div class="field"><label>Valeur <span id="valueCurrency"></span></label><div class="inline-fields"><input aria-label="Valeur minimum" id="valueMin" type="number" min="0" placeholder="Min"/><input aria-label="Valeur maximum" id="valueMax" type="number" min="0" placeholder="Max"/></div></div>
-    <div class="field"><label>Salaire hebdomadaire</label><div class="inline-fields"><input aria-label="Salaire minimum" id="wageMin" type="number" min="0" placeholder="Min"/><input aria-label="Salaire maximum" id="wageMax" type="number" min="0" placeholder="Max"/></div></div>
+    <div class="field"><label>Valeur <span id="valueCurrency"></span></label><div class="inline-fields"><input class="control money-input" aria-label="Valeur minimum" id="valueMin" inputmode="decimal" placeholder="Min"/><input class="control money-input" aria-label="Valeur maximum" id="valueMax" inputmode="decimal" placeholder="Max"/></div></div>
+    <div class="field"><label>Salaire hebdomadaire</label><div class="inline-fields"><input class="control money-input" aria-label="Salaire minimum" id="wageMin" inputmode="decimal" placeholder="Min"/><input class="control money-input" aria-label="Salaire maximum" id="wageMax" inputmode="decimal" placeholder="Max"/></div></div>
     <p id="financialAvailability" class="note" style="margin:4px 0 12px"></p>
     <details class="search-attributes"><summary>Filtrer par attributs</summary><div class="field"><label for="searchAttribute">Attribut ou aptitude</label><select id="searchAttribute"></select></div><div class="inline-fields"><input aria-label="Attribut minimum" id="attributeMin" type="number" min="1" max="20" placeholder="Min / 20"/><input aria-label="Attribut maximum" id="attributeMax" type="number" min="1" max="20" placeholder="Max / 20"/></div><button id="addAttributeFilter" class="btn btn-outline" type="button" style="margin-top:8px">Ajouter le critère</button><div id="attributeFilterList" class="filter-chips"></div></details>
     <button id="reset" class="btn btn-outline">Effacer les filtres</button>
@@ -63,7 +92,7 @@ body:not(.has-value) .finance-value,body:not(.has-wage) .finance-wage{display:no
     <div class="field"><button id="exportEdits" class="btn">Exporter les modifications</button></div>
     <div class="note">La sélection et les modifications en attente restent dans ce navigateur. Le bouton Enregistrer les stats écrit dans la partie locale ouverte.</div>
   </section>
-  <div class="side-footer">PAUSCOUT v0.14.1 · Édition locale des joueurs et du staff · Non affilié à SEGA ou Sports Interactive.</div>
+  <div class="side-footer">PAUSCOUT v0.14.2 · Édition locale des joueurs et du staff · Non affilié à SEGA ou Sports Interactive.</div>
 </aside>
 <main class="main">
   <div class="topline"><div><div class="micro">FOOTBALL MANAGER 2027 / JOUEURS</div><h1 class="title">Explore et modifie <b>ta partie.</b></h1><p class="subtitle">Parcours les clubs, consulte les joueurs et enregistre leurs stats dans ta sauvegarde locale.</p></div><div class="top-actions"><div id="status" class="live">● Local et privé</div><button id="importTop" type="button" class="btn btn-primary">⇧ Importer pour consulter</button><button id="quit" class="btn btn-outline" style="padding:6px 10px">Quitter</button></div></div>
@@ -81,19 +110,33 @@ body:not(.has-value) .finance-value,body:not(.has-wage) .finance-wage{display:no
   <div id="toast" role="status" class="toast"></div>
   <div class="mode-switch" role="tablist" aria-label="Type de personne"><button id="modePlayers" class="btn active" role="tab" aria-selected="true">Joueurs</button><button id="modeStaff" class="btn" role="tab" aria-selected="false" disabled>Staff</button></div>
   <div class="stats"><div class="stat"><div class="k" id="statLoadedLabel">Joueurs chargés</div><div class="v" id="statPlayers">—</div><small>dans le fichier ouvert</small></div><div class="stat"><div class="k" id="statShownLabel">Joueurs affichés</div><div class="v" id="statFiltered">—</div><small>après tes filtres</small></div><div class="stat"><div class="k">PA ≥ 160</div><div class="v gold" id="statTalents">—</div><small>si le potentiel est connu</small></div><div class="stat"><div class="k">Sélection</div><div class="v mint" id="statShortlist">0</div><small id="statSelectionLabel">joueurs dans ma sélection</small></div></div>
-  <div class="workarea">
-    <section class="panel"><div class="panel-top"><h3><span id="listTitle">Joueurs</span> <span id="countBadge" class="badge">Aucune donnée</span></h3><div class="toolbar"><label class="small-muted" for="sort">Trier</label><select id="sort"><option value="ca">CA décroissante</option><option value="pa">PA décroissante</option><option value="age">Âge croissant</option><option value="name">Nom A → Z</option><option value="gap">Marge de progression</option><option value="value">Valeur décroissante</option><option value="wage">Salaire décroissant</option></select></div></div>
+  <section class="panel"><div class="panel-top"><h3><span id="listTitle">Joueurs</span> <span id="countBadge" class="badge">Aucune donnée</span></h3><div class="toolbar"><label class="small-muted" for="sort">Trier</label><select id="sort"><option value="ca">CA décroissante</option><option value="pa">PA décroissante</option><option value="age">Âge croissant</option><option value="name">Nom A → Z</option><option value="gap">Marge de progression</option><option value="value">Valeur décroissante</option><option value="wage">Salaire décroissant</option></select></div></div>
       <div id="breadcrumbs" class="breadcrumb" aria-label="Navigation actuelle">Choisis un pays pour parcourir les clubs.</div>
       <div class="table-wrap"><div id="empty" class="empty"><div style="font-size:32px">⚽</div><h3>Prêt à explorer ta partie</h3><p>Ouvre ton fichier <b>.fm</b> avec le lecteur local, ou importe un CSV / JSON de joueurs.</p><p class="small-muted">Le lecteur FM27 affiche les fiches identifiées avec leur CA, PA et attributs ; la couverture de la base est encore partielle.</p></div><table id="playersTable" class="hidden"><thead><tr><th id="personColumn">Joueur</th><th>Club</th><th>Équipe</th><th>Âge</th><th id="positionColumn">Position</th><th>CA</th><th>PA</th><th class="finance-value">Valeur</th><th class="finance-wage">Salaire/sem.</th><th>Progression</th><th>Favoris</th></tr></thead><tbody id="rows"></tbody></table></div>
       <div class="footer-table"><span id="resultsCount">0 résultat</span><div class="pager"><button class="btn btn-outline" id="prev">‹</button><span id="page">1 / 1</span><button class="btn btn-outline" id="next">›</button></div></div>
-    </section>
-    <aside class="panel"><div class="panel-top"><h3 id="detailTitle">Fiche du joueur</h3><span class="badge">Profil</span></div><div class="details" id="detail"><div class="empty" style="padding:54px 5px">Sélectionne un joueur pour consulter ses attributs, le comparer ou préparer des modifications.</div></div></aside>
-  </div>
+  </section>
 </main>
 </div>
+<dialog id="profileDialog" class="panel profile-dialog" aria-labelledby="profileName">
+  <header class="profile-head">
+    <div class="person-head">
+      <div id="profileAvatar" class="avatar" aria-hidden="true"></div>
+      <div><h2 id="profileName" class="pname"></h2><div id="profileMetadata" class="pos"></div></div>
+    </div>
+    <button id="closeProfile" class="btn btn-outline profile-close" type="button" aria-label="Fermer la fiche" autofocus>×</button>
+  </header>
+  <div id="profileFeedback" class="toast profile-feedback" role="status"></div>
+  <div id="detail" class="profile-scroll"></div>
+  <footer class="editor-save">
+    <span id="profileChanges"></span>
+    <button id="detailReset" class="btn btn-outline" type="button" disabled>Annuler la fiche</button>
+    <button id="detailSave" class="btn btn-gold" type="button" disabled>Enregistrer (0)</button>
+  </footer>
+</dialog>
 <script>
 'use strict';
 const $=id=>document.getElementById(id);
+const profileDialog=$('profileDialog');
 const es=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const norm=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
 const nval=v=>v===null||v===undefined||v===''||!Number.isFinite(Number(v))?null:Math.min(200,Math.max(0,Math.round(Number(v))));
@@ -102,10 +145,24 @@ const show=v=>(v===null||v===undefined||v==='')?'—':es(v);
 const storeGet=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
 let players=[],playerRecords=[],staffRecords=[],filtered=[],byId=new Map(),selected=null,compareTo=null,page=0,onlyFav=false,fmAttributeOrder=[],staffAttributeOrder=[],staffRoleOrder=[],localToken='',localOpenedPath='',currentMode='players';
 let euroRate=null, fmCurrency=false, currency='GBP';
+let saveInProgress=false;
+const valueBounds=['valueMin','valueMax'];
+const amountInputs=[...valueBounds,'wageMin','wageMax'];
+const amountFormatter=new Intl.NumberFormat('fr-FR',{useGrouping:'always',maximumFractionDigits:20});
+function enteredAmount(input){
+  const text=input.trim().replace(/[ \u00a0\u202f]/g,'').replace(',','.');
+  return /^\d+(?:\.\d+)?$/.test(text)&&Number.isFinite(Number(text))?Number(text):null;
+}
+function formatMoneyNumber(amount){return amountFormatter.format(amount).replaceAll('\u202f','\u00a0')}
+function formatAmount(amount,symbol=''){
+  return Number.isFinite(amount)?formatMoneyNumber(amount)+(symbol?'\u00a0'+symbol:''):'—';
+}
+function sourceSymbol(raw){return typeof raw==='string'?(raw.match(/[€£$]/)?.[0]||''):''}
 function displayValue(raw){let n=moneyVal(raw);return n===null?null:fmCurrency&&currency==='EUR'?Math.round(n*euroRate):n}
 function rawValue(display){return fmCurrency&&currency==='EUR'?Math.round(display/euroRate):display}
 function valueSymbol(){return fmCurrency?(currency==='EUR'?'€':'£'):''}
-function formatValue(raw){let value=displayValue(raw);return value===null?'—':value.toLocaleString('fr-FR')+(valueSymbol()?' '+valueSymbol():'')}
+function formatValue(raw,original=raw){return formatAmount(displayValue(raw),valueSymbol()||sourceSymbol(original))}
+function formatWage(raw){return formatAmount(moneyVal(raw),sourceSymbol(raw))}
 function configureCurrency(rate,isFM){fmCurrency=isFM;euroRate=Number.isFinite(Number(rate))&&Number(rate)>0?Number(rate):null;currency=fmCurrency&&euroRate?'EUR':'GBP';$('currency').value=currency;$('currency').disabled=!fmCurrency;$('currency').querySelector('[value="EUR"]').disabled=!fmCurrency||!euroRate;$('valueCurrency').textContent=valueSymbol()?`(${valueSymbol()})`:''}
 let playerShortlist=new Set(storeGet('pauscout.shortlist',[])),staffShortlist=new Set(storeGet('pauscout.staffShortlist',[])),shortlist=playerShortlist;
 let playerChanges=storeGet('pauscout.changes',{}),staffChanges=storeGet('pauscout.staffChanges',{}),changes=playerChanges;
@@ -142,11 +199,27 @@ const countryLabel=name=>countryLabels[name]||name;
 let openAttributeGroups=new Set(['technique','coups_arretes','mental','physique','caches']);
 let lastDetailUid=null;
 let editorTab='attributs';
-function notify(message,error=false){let el=$('toast');el.className='toast '+(error?'error':'info');el.textContent=message;if(!error)setTimeout(()=>{if(el.textContent===message)el.className='toast'},9000)}
+function notify(message,error=false){
+  const toasts=profileDialog.open?[$('toast'),$('profileFeedback')]:[$('toast')];
+  for(const toast of toasts){
+    toast.classList.toggle('error',error);
+    toast.classList.toggle('info',!error);
+    toast.textContent=message;
+    if(!error)setTimeout(()=>{if(toast.textContent===message&&!toast.classList.contains('error'))toast.classList.remove('info')},9000);
+  }
+}
 function num(v){return v===null||v===undefined?'—':v}
 function persist(){try{localStorage.setItem('pauscout.shortlist',JSON.stringify([...playerShortlist]));localStorage.setItem('pauscout.staffShortlist',JSON.stringify([...staffShortlist]));localStorage.setItem('pauscout.changes',JSON.stringify(playerChanges));localStorage.setItem('pauscout.staffChanges',JSON.stringify(staffChanges))}catch{};updateSaveButton()}
 function pendingEdits(){return Object.entries(changes).filter(([uid])=>byId.has(uid)).map(([uid,change])=>({uid:Number(uid),...change}))}
-function updateSaveButton(){let count=localToken?pendingEdits().length:0;$('saveEdits').disabled=!count||$('localSave').value!==localOpenedPath;$('saveEdits').textContent=`Enregistrer les stats (${count})`}
+function updateSaveButton(){
+  const count=localToken?pendingEdits().length:0;
+  const disabled=saveInProgress||!count||$('localSave').value!==localOpenedPath;
+  $('saveEdits').disabled=$('detailSave').disabled=disabled;
+  $('saveEdits').textContent=saveInProgress?'Enregistrement en cours…':`Enregistrer les stats (${count})`;
+  $('detailSave').textContent=saveInProgress?'Enregistrement…':`Enregistrer (${count})`;
+  $('detailReset').disabled=saveInProgress||!changes[selected];
+  $('detail').inert=saveInProgress;
+}
 function ageFromBirth(birth,gameDate){if(!birth||!gameDate||birth>gameDate)return null;const [y,m,d]=birth.split('-').map(Number),[gy,gm,gd]=gameDate.split('-').map(Number);if(!y||!gy)return null;return gy-y-(gm<m||gm===m&&gd<d?1:0)}
 function effective(p){let c=changes[p.uid];return c?{...p,ca:c.ca??p.ca,pa:c.pa??p.pa,value:c.value??p.value,birth_date:c.birth_date??p.birth_date,age:c.birth_date!==undefined?ageFromBirth(c.birth_date,lastSummary?.game_date):p.age,attrs:{...p.attrs,...(c.attrs||{})},roles:{...(p.roles||{}),...(c.roles||{})},personality:{...(p.personality||{}),...(c.personality||{})},positions_ratings:{...(p.positions_ratings||{}),...(c.positions_ratings||{})},traits:{...(p.traits||{}),...(c.traits||{})},height:c.height??p.height,home_rep:c.home_rep??p.home_rep,current_rep:c.current_rep??p.current_rep,world_rep:c.world_rep??p.world_rep}:p}
 function ensureAttributes(p){if(!p)return;let order=p.isStaff?staffAttributeOrder:fmAttributeOrder;if(p.attrsBase64){let raw=atob(p.attrsBase64);if(raw.length===order.length){for(let i=0;i<raw.length;i++){let value=raw.charCodeAt(i);if(value>=1&&value<=20)p.attrs[order[i]]=value}p.attrsBase64=''}}if(p.isStaff&&p.rolesBase64){let raw=atob(p.rolesBase64);if(raw.length===staffRoleOrder.length){for(let i=0;i<raw.length;i++){let value=raw.charCodeAt(i);if(value>=1&&value<=20)p.roles[staffRoleOrder[i]]=value}p.rolesBase64=''}}}
@@ -178,6 +251,7 @@ function setPlayers(list,source,staffList=[]){
   notify(`${playerRecords.length.toLocaleString('fr-FR')} joueurs et ${staffRecords.length.toLocaleString('fr-FR')} membres du staff chargés.`)
 }
 function switchMode(mode){
+  if(profileDialog.open)profileDialog.close();
   currentMode=mode;players=mode==='staff'?staffRecords:playerRecords;byId=new Map(players.map(p=>[p.uid,p]));
   changes=mode==='staff'?staffChanges:playerChanges;shortlist=mode==='staff'?staffShortlist:playerShortlist;
   selected=null;compareTo=null;lastDetailUid=null;page=0;onlyFav=false;$('shortlistOnly').textContent='☆ Ma sélection';
@@ -186,7 +260,7 @@ function switchMode(mode){
   $('personColumn').textContent=mode==='staff'?'Membre du staff':'Joueur';$('positionColumn').textContent=mode==='staff'?'Fonction':'Position';
   $('listTitle').textContent=mode==='staff'?'Staff':'Joueurs';
   $('genderFilter').options[0].textContent=mode==='staff'?'Tout le staff':'Tous les joueurs';
-  $('positionLabel').textContent=mode==='staff'?'Fonction':'Position';$('detailTitle').textContent=mode==='staff'?'Fiche du staff':'Fiche du joueur';
+  $('positionLabel').textContent=mode==='staff'?'Fonction':'Position';
   $('statLoadedLabel').textContent=mode==='staff'?'Staff chargé':'Joueurs chargés';$('statShownLabel').textContent=mode==='staff'?'Staff affiché':'Joueurs affichés';
   $('statSelectionLabel').textContent=mode==='staff'?'membres du staff dans ma sélection':'joueurs dans ma sélection';
   if(mode==='staff'){$('positionFilter').innerHTML='<option value="">Toutes les fonctions</option>'+[...new Set(staffRecords.map(p=>p.position).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'fr')).map(job=>`<option value="${es(job)}">${es(job)}</option>`).join('')}else{$('positionFilter').innerHTML='<option value="">Tous les postes</option>'+['GB','LIB','DG','DC','DD','MD','MG','MC','MR','MOG','MOC','MOD','BU','PIG','PID'].map(pos=>`<option>${pos}</option>`).join('')}
@@ -202,7 +276,8 @@ function searchBound(id){return $(id).value===''?null:Number($(id).value)}
 function inRange(value,min,max){if(min===null&&max===null)return true;return value!==null&&value!==undefined&&Number.isFinite(Number(value))&&(min===null||Number(value)>=min)&&(max===null||Number(value)<=max)}
 function apply(){
   const q=norm($('search').value),nation=norm($('nationFilter').value),country=$('countryFilter').value,league=$('leagueFilter').value,club=$('clubFilter').value,squad=$('squadFilter').value,gender=$('genderFilter').value,position=$('positionFilter').value;
-  const ageMin=searchBound('ageMin'),ageMax=searchBound('ageMax'),caMin=searchBound('caMin'),caMax=searchBound('caMax'),paMin=searchBound('paMin'),paMax=searchBound('paMax'),valueMin=searchBound('valueMin'),valueMax=searchBound('valueMax'),wageMin=searchBound('wageMin'),wageMax=searchBound('wageMax'),criteria=attributeCriteria[currentMode];
+  const ageMin=searchBound('ageMin'),ageMax=searchBound('ageMax'),caMin=searchBound('caMin'),caMax=searchBound('caMax'),paMin=searchBound('paMin'),paMax=searchBound('paMax'),criteria=attributeCriteria[currentMode];
+  const [valueMin,valueMax,wageMin,wageMax]=amountInputs.map(id=>enteredAmount($(id).value));
   filtered=players.filter(p=>{
     if(q&&!norm(p.name+' '+p.club+' '+p.uid).includes(q))return false;
     if(nation&&!norm(countryLabel(p.nation)+' '+p.nation).includes(nation))return false;
@@ -215,13 +290,36 @@ function apply(){
   });
   const sort=$('sort').value;
   filtered.sort((a,b)=>{let x=effective(a),y=effective(b);if(sort==='name')return x.name.localeCompare(y.name,'fr');if(sort==='age')return (x.age??999)-(y.age??999);let score=v=>sort==='gap'?v.ca!==null&&v.pa!==null?v.pa-v.ca:null:sort==='value'||sort==='wage'?moneyVal(v[sort]):v[sort==='pa'?'pa':'ca'];return (score(y)??-1)-(score(x)??-1)});
-  page=Math.min(page,Math.max(0,Math.ceil(filtered.length/pageSize)-1));$('statPlayers').textContent=players.length?players.length.toLocaleString('fr-FR'):'—';$('statFiltered').textContent=players.length?filtered.length.toLocaleString('fr-FR'):'—';$('statTalents').textContent=players.length?players.filter(p=>(effective(p).pa??0)>=160).length.toLocaleString('fr-FR'):'—';$('statShortlist').textContent=shortlist.size.toLocaleString('fr-FR');$('countBadge').textContent=players.length?filtered.length.toLocaleString('fr-FR')+' trouvés':'Aucune donnée';renderBreadcrumbs();renderTable();renderDetail();
+  page=Math.min(page,Math.max(0,Math.ceil(filtered.length/pageSize)-1));$('statPlayers').textContent=players.length?players.length.toLocaleString('fr-FR'):'—';$('statFiltered').textContent=players.length?filtered.length.toLocaleString('fr-FR'):'—';$('statTalents').textContent=players.length?players.filter(p=>(effective(p).pa??0)>=160).length.toLocaleString('fr-FR'):'—';$('statShortlist').textContent=shortlist.size.toLocaleString('fr-FR');$('countBadge').textContent=players.length?filtered.length.toLocaleString('fr-FR')+' trouvés':'Aucune donnée';renderBreadcrumbs();renderTable();
+  if(profileDialog.open)renderDetail();
 }
-function renderTable(){let list=filtered.slice(page*pageSize,(page+1)*pageSize);$('playersTable').classList.toggle('hidden',!players.length);$('empty').classList.toggle('hidden',!!players.length);if(players.length&&!filtered.length){$('rows').innerHTML=`<tr><td colspan="11" style="padding:32px;text-align:center">Aucun ${currentMode==='staff'?'membre du staff':'joueur'} ne correspond aux filtres.</td></tr>`}else{$('rows').innerHTML=list.map(p=>{let v=effective(p),gap=v.ca!==null&&v.pa!==null?v.pa-v.ca:null,value=moneyVal(v.value),wage=moneyVal(v.wage);return `<tr data-uid="${es(p.uid)}" class="${selected===p.uid?'selected':''}"><td><strong>${es(v.name)}</strong><div class="small-muted">${es(v.nation)}</div></td><td>${show(v.club)}</td><td>${show(v.squad)}</td><td>${show(v.age)}</td><td>${show(v.position)}</td><td class="number">${num(v.ca)}</td><td class="number gold">${num(v.pa)}</td><td class="finance-value number">${formatValue(v.value)}</td><td class="finance-wage number">${wage===null?'—':wage.toLocaleString('fr-FR')}</td><td class="number ${gap!==null&&gap>=25?'mint':''}">${gap!==null?(gap>0?'+':'')+gap:'—'}</td><td><button class="btn btn-outline star" data-star="${es(p.uid)}" title="Favori">${shortlist.has(p.uid)?'★':'☆'}</button></td></tr>`}).join('')}
-$('rows').querySelectorAll('[data-uid]').forEach(tr=>tr.classList.toggle('pending',!!changes[tr.dataset.uid]));
-$('resultsCount').textContent=`${filtered.length.toLocaleString('fr-FR')} résultat(s) · ${(page*pageSize+1)*!!filtered.length}-${Math.min((page+1)*pageSize,filtered.length)}`;$('page').textContent=(page+1)+' / '+Math.max(1,Math.ceil(filtered.length/pageSize));$('prev').disabled=page===0;$('next').disabled=(page+1)*pageSize>=filtered.length}
-function renderDetail(){const p=byId.get(selected);if(!p){lastDetailUid=null;$('detail').innerHTML=`<div class="empty" style="padding:54px 5px">Sélectionne ${currentMode==='staff'?'un membre du staff':'un joueur'} pour consulter et modifier ses attributs.</div>`;return}ensureAttributes(p);const v=effective(p),gap=v.ca!==null&&v.pa!==null?v.pa-v.ca:null,attrs=Object.entries(v.attrs||{}),c=compareTo?byId.get(compareTo):null;if(c)ensureAttributes(c);
-if(lastDetailUid!==selected){openAttributeGroups=new Set(p.isStaff?['encadrement','mental_staff','connaissances','medical','postes']:positionMatches(v.position,'GB')?['gardien','mental','physique','caches','personnalite']:['technique','coups_arretes','mental','physique','caches','personnalite']);lastDetailUid=selected}
+function renderTable(){
+  const list=filtered.slice(page*pageSize,(page+1)*pageSize);
+  $('playersTable').classList.toggle('hidden',!players.length);
+  $('empty').classList.toggle('hidden',!!players.length);
+  if(players.length&&!filtered.length){
+    $('rows').innerHTML=`<tr><td colspan="11" style="padding:32px;text-align:center">Aucun ${currentMode==='staff'?'membre du staff':'joueur'} ne correspond aux filtres.</td></tr>`;
+  }else{
+    $('rows').innerHTML=list.map(p=>{
+      const v=effective(p),gap=v.ca!==null&&v.pa!==null?v.pa-v.ca:null;
+      return `<tr data-uid="${es(p.uid)}" class="${selected===p.uid?'selected':''} ${changes[p.uid]?'pending':''}">
+        <td><button type="button" class="profile-trigger" aria-haspopup="dialog">${es(v.name)}</button><div class="small-muted">${es(v.nation)}</div></td>
+        <td>${show(v.club)}</td><td>${show(v.squad)}</td><td>${show(v.age)}</td><td>${show(v.position)}</td>
+        <td class="number">${num(v.ca)}</td><td class="number gold">${num(v.pa)}</td>
+        <td class="finance-value number">${formatValue(v.value,p.value)}</td><td class="finance-wage number">${formatWage(v.wage)}</td>
+        <td class="number ${gap!==null&&gap>=25?'mint':''}">${gap!==null?(gap>0?'+':'')+gap:'—'}</td>
+        <td><button class="btn btn-outline star" data-star="${es(p.uid)}" title="Favori">${shortlist.has(p.uid)?'★':'☆'}</button></td>
+      </tr>`;
+    }).join('');
+  }
+  $('resultsCount').textContent=`${filtered.length.toLocaleString('fr-FR')} résultat(s) · ${(page*pageSize+1)*!!filtered.length}-${Math.min((page+1)*pageSize,filtered.length)}`;
+  $('page').textContent=(page+1)+' / '+Math.max(1,Math.ceil(filtered.length/pageSize));
+  $('prev').disabled=page===0;
+  $('next').disabled=(page+1)*pageSize>=filtered.length;
+}
+function renderDetail(){const p=byId.get(selected);if(!p)return;ensureAttributes(p);const v=effective(p),gap=v.ca!==null&&v.pa!==null?v.pa-v.ca:null,attrs=Object.entries(v.attrs||{}),c=compareTo!==selected?byId.get(compareTo):null;if(c)ensureAttributes(c);
+const detail=$('detail'),isNewProfile=lastDetailUid!==selected,scrollTop=isNewProfile?0:detail.scrollTop;
+if(isNewProfile){openAttributeGroups=new Set(p.isStaff?['encadrement','mental_staff','connaissances','medical','postes']:positionMatches(v.position,'GB')?['gardien','mental','physique','caches','personnalite']:['technique','coups_arretes','mental','physique','caches','personnalite']);lastDetailUid=selected}
 const groupSource=p.isStaff?staffAttributeGroups:attributeGroups;
 const labels=p.isStaff?staffAttributeLabels:attributeLabels;
 const assigned=new Set(groupSource.flatMap(group=>group.keys));
@@ -238,19 +336,54 @@ const traitsHTML=!p.isStaff&&p.traits_known?`<details class="attr-group" data-gr
 const positionsHTML=!p.isStaff&&Object.keys(v.positions_ratings||{}).length?`<details class="attr-group" data-group="positions" ${openAttributeGroups.has('positions')?'open':''}><summary>Positions</summary><div class="attr-grid">${Object.entries(v.positions_ratings).map(([key,value])=>`<div class="attr"><label>${es(key)}</label><input aria-label="Position ${es(key)}" data-position-rating="${es(key)}" type="number" min="1" max="20" value="${value}"></div>`).join('')}</div></details>`:'';
 const personalityHTML=visiblePersonality.length?`<details class="attr-group" data-group="personnalite" ${openAttributeGroups.has('personnalite')?'open':''}><summary>Personnalité<span class="group-count">${visiblePersonality.length}</span></summary><div class="attr-grid">${visiblePersonality.map(key=>{const label=personalityLabels[key],diff=c?((effective(c).personality||{})[key]??null):null;return `<div class="attr"><label for="personality-${es(key)}">${es(label)}${diff!==null?` <span class="small-muted">/ ${diff}</span>`:''}</label><input id="personality-${es(key)}" aria-label="${es(label)}" data-personality="${es(key)}" type="number" min="1" max="20" value="${v.personality[key]}"/></div>`}).join('')}</div></details>`:'';
 const roleHTML=roleKeys.length?`<details class="attr-group" data-group="postes" ${openAttributeGroups.has('postes')?'open':''}><summary>Aptitudes aux postes<span class="group-count">${roleKeys.length}</span></summary><div class="attr-grid">${roleKeys.map(key=>{const label=staffRoleLabels[key]||key.replaceAll('_',' '),diff=c?((effective(c).roles||{})[key]??null):null;return `<div class="attr"><label for="role-${es(key)}">${es(label)}${diff!==null?` <span class="small-muted">/ ${diff}</span>`:''}</label><input id="role-${es(key)}" aria-label="${es(label)}" data-role="${es(key)}" type="number" min="1" max="20" value="${v.roles[key]}"/></div>`}).join('')}</div></details>`:'';
-$('detail').innerHTML=`${c?`<div class="compare-box">Comparaison active avec <b>${es(effective(c).name)}</b> <button id="clearCompare" class="btn btn-outline" style="padding:3px 7px;float:right">✕</button></div>`:''}<div class="person-head"><div class="avatar">${es(v.name.slice(0,1).toUpperCase())}</div><div><div class="pname">${es(v.name)}</div><div class="pos">${es(v.position||'Poste non renseigné')} · ${es(v.club||'Club inconnu')}</div></div></div><div class="detail-kpis"><div><label>Âge</label><b>${show(v.age)}</b></div><div><label>CA / 200</label><b class="mint">${num(v.ca)}</b></div><div><label>PA / 200</label><b class="gold">${num(v.pa)}</b></div></div><div class="small-muted">Progression théorique : <strong>${gap===null?'inconnue':(gap>0?'+':'')+gap+' points'}</strong></div><div class="edit-status">${changes[p.uid]?'Modifications en attente. Clique sur Enregistrer les stats pour écrire dans cette partie.':localToken?'Partie locale ouverte. Modifie une valeur pour préparer son enregistrement.':'Ouvre une sauvegarde locale ci-dessus pour enregistrer des modifications.'}</div><div class="section-head">CAPACITÉS</div><div class="edit-abilities"><label>Capacité actuelle (CA)<input data-ability="ca" type="number" min="${p.isStaff?1:0}" max="200" value="${v.ca??''}" placeholder="Inconnue" /></label><label>Potentiel (PA)<input data-ability="pa" type="number" min="${p.isStaff?1:0}" max="200" value="${v.pa??''}" placeholder="Inconnue" /></label></div><div class="section-head">ATTRIBUTS <span class="small-muted">${attrs.length} connus</span></div>${playerInfoHTML}${positionsHTML}${traitsHTML}${attrHTML}${personalityHTML}${roleHTML}<div class="detail-actions"><button id="fav" class="btn btn-gold">${shortlist.has(p.uid)?'★ Retirer':'☆ Ajouter'}</button><button id="compare" class="btn btn-outline">Comparer</button></div><p class="tagline">ID ${es(v.uid)} · Les notes CA/PA sont des valeurs brutes, pas une garantie de performance.</p>`;
-if(v.squad)$('detail').querySelector('.pos').textContent+=` · ${v.squad}`;
-if(v.gender)$('detail').querySelector('.pos').textContent+=` · ${v.gender==='female'?'Femme':'Homme'}`;
-const detail=$('detail'),availableTabs=[['attributs','Attributs'],...(!p.isStaff&&p.traits_known?[['traits','Traits']]:[]),...(!p.isStaff&&Object.keys(v.positions_ratings||{}).length?[['positions','Positions']]:[]),...(hasInfo?[['infos','Infos']]:[])];
-if(!p.isStaff&&detail.querySelector('[data-group="infos"] .attr-grid'))detail.querySelector('[data-group="infos"] .attr-grid').insertAdjacentHTML('beforeend',`<div class="attr value-field"><label for="playerValue">Valeur du joueur ${valueSymbol()?`(${valueSymbol()})`:''}</label><input id="playerValue" type="number" min="1" step="1" placeholder="Inconnue" value="${displayValue(v.value)??''}"></div>`);
+$('profileAvatar').textContent=v.name.slice(0,1).toUpperCase();
+$('profileName').textContent=v.name;
+$('profileMetadata').textContent=[v.position||'Poste non renseigné',v.club||'Club inconnu',v.squad,v.gender&&(v.gender==='female'?'Femme':'Homme')].filter(Boolean).join(' · ');
+const profileValue=displayValue(v.value),profileWage=moneyVal(v.wage),financialFacts=[];
+if(profileValue!==null)financialFacts.push(`<div><dt>Valeur</dt><dd>${formatValue(v.value,p.value)}</dd></div>`);
+if(profileWage!==null)financialFacts.push(`<div><dt>Salaire hebdomadaire</dt><dd>${formatWage(v.wage)}</dd></div>`);
+detail.innerHTML=`
+  ${c?`<div class="compare-box"><span>Comparaison avec <b>${es(c.name)}</b></span><button id="clearCompare" type="button" class="btn btn-outline" aria-label="Arrêter la comparaison">×</button></div>`:''}
+  <div class="detail-kpis"><div><label>Âge</label><b>${show(v.age)}</b></div><div><label>CA / 200</label><b class="mint">${num(v.ca)}</b></div><div><label>PA / 200</label><b class="gold">${num(v.pa)}</b></div></div>
+  ${financialFacts.length?`<dl class="profile-finances">${financialFacts.join('')}</dl>`:''}
+  <div class="small-muted">Progression théorique : <strong>${gap===null?'inconnue':(gap>0?'+':'')+gap+' points'}</strong></div>
+  ${localToken?'':'<p class="editor-hint">Ouvre une sauvegarde locale pour enregistrer les modifications.</p>'}
+  <div class="detail-actions"><button id="fav" class="btn btn-gold" type="button">${shortlist.has(p.uid)?'★ Retirer':'☆ Ajouter'}</button><button id="compare" class="btn btn-outline" type="button">Comparer</button></div>
+  <div class="section-head">CAPACITÉS</div>
+  <div class="edit-abilities"><label>Capacité actuelle (CA)<input data-ability="ca" type="number" min="${p.isStaff?1:0}" max="200" value="${v.ca??''}" placeholder="Inconnue"></label><label>Potentiel (PA)<input data-ability="pa" type="number" min="${p.isStaff?1:0}" max="200" value="${v.pa??''}" placeholder="Inconnue"></label></div>
+  <div class="section-head">ATTRIBUTS <span class="small-muted">${attrs.length} connus</span></div>
+  ${playerInfoHTML}${positionsHTML}${traitsHTML}${attrHTML}${personalityHTML}${roleHTML}
+  <p class="tagline">ID ${es(v.uid)}</p>`;
+const availableTabs=[['attributs','Attributs'],...(!p.isStaff&&p.traits_known?[['traits','Traits']]:[]),...(!p.isStaff&&Object.keys(v.positions_ratings||{}).length?[['positions','Positions']]:[]),...(hasInfo?[['infos','Infos']]:[])];
+const infoGrid=detail.querySelector('[data-group="infos"] .attr-grid');
+if(!p.isStaff&&infoGrid){
+  const symbol=valueSymbol()||sourceSymbol(p.value);
+  infoGrid.insertAdjacentHTML('beforeend',`<div class="attr value-field"><label for="playerValue">Valeur du joueur ${symbol?`(${symbol})`:''}</label><input id="playerValue" class="money-input" inputmode="numeric" placeholder="Inconnue" value="${profileValue===null?'':formatMoneyNumber(profileValue)}"></div>`);
+}
 if(!availableTabs.some(([id])=>id===editorTab))editorTab='attributs';
-const navigation=document.createElement('nav');navigation.className='editor-tabs';navigation.setAttribute('aria-label','Rubriques de la fiche');navigation.innerHTML=availableTabs.map(([id,label])=>`<button type="button" class="btn btn-outline ${editorTab===id?'active':''}" data-editor-tab="${id}" aria-pressed="${editorTab===id}">${label}</button>`).join('');detail.querySelector('.edit-status').after(navigation);
+const navigation=document.createElement('nav');navigation.className='editor-tabs';navigation.setAttribute('aria-label','Rubriques de la fiche');navigation.innerHTML=availableTabs.map(([id,label])=>`<button type="button" class="btn btn-outline ${editorTab===id?'active':''}" data-editor-tab="${id}" aria-pressed="${editorTab===id}">${label}</button>`).join('');detail.querySelector('.edit-abilities').after(navigation);
 const selectTab=id=>{editorTab=id;navigation.querySelectorAll('button').forEach(button=>{let active=button.dataset.editorTab===id;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active))});detail.querySelectorAll('.attr-group').forEach(group=>{let section=['positions','traits','infos'].includes(group.dataset.group)?group.dataset.group:'attributs';group.classList.toggle('hidden',section!==id);if(section===id&&id!=='attributs'){group.open=true;openAttributeGroups.add(id)}});const headers=detail.querySelectorAll('.section-head');if(headers[1])headers[1].classList.toggle('hidden',id!=='attributs')};navigation.querySelectorAll('button').forEach(button=>button.addEventListener('click',()=>selectTab(button.dataset.editorTab)));selectTab(editorTab);
-const patch=changes[p.uid]||{},fieldCount=Object.values(patch).reduce((n,x)=>n+(x&&typeof x==='object'?Object.keys(x).length:1),0),saveBar=document.createElement('div');saveBar.className='editor-save';saveBar.innerHTML=`<span>${fieldCount?`${fieldCount} modification${fieldCount>1?'s':''} sur cette fiche`:'Aucune modification sur cette fiche'}</span><button type="button" class="btn btn-outline" id="detailReset" ${fieldCount?'':'disabled'}>Annuler la fiche</button><button type="button" class="btn btn-gold" id="detailSave" ${localToken&&pendingEdits().length&&$('localSave').value===localOpenedPath?'':'disabled'}>Enregistrer (${pendingEdits().length})</button>`;detail.append(saveBar);$('detailSave').addEventListener('click',()=>$('saveEdits').click());$('detailReset').addEventListener('click',()=>{delete changes[p.uid];persist();apply()});
+const patch=changes[p.uid]||{},fieldCount=Object.values(patch).reduce((n,x)=>n+(x&&typeof x==='object'?Object.keys(x).length:1),0);
+$('profileChanges').textContent=fieldCount?`${fieldCount} modification${fieldCount>1?'s':''} sur cette fiche`:'Aucune modification sur cette fiche';
+updateSaveButton();
 detail.querySelectorAll('[data-ability]').forEach(el=>el.classList.toggle('changed',Object.hasOwn(patch,el.dataset.ability)));detail.querySelectorAll('[data-info]').forEach(el=>el.closest('.attr').classList.toggle('changed',Object.hasOwn(patch,el.dataset.info)));detail.querySelectorAll('[data-trait]').forEach(el=>el.closest('.attr').classList.toggle('changed',Object.hasOwn(patch.traits||{},el.dataset.trait)));
 const birthInput=$('birthDate');if(birthInput){birthInput.closest('.attr').classList.toggle('changed',Object.hasOwn(patch,'birth_date'));birthInput.addEventListener('change',()=>{if(!birthInput.value||!birthInput.validity.valid){notify('Choisis une date de naissance valide avant la date de la partie.',true);renderDetail();return}let cur=changes[p.uid]||{};if(birthInput.value===p.birth_date)delete cur.birth_date;else cur.birth_date=birthInput.value;if(Object.keys(cur).length)changes[p.uid]=cur;else delete changes[p.uid];persist();apply()})}
-const valueInput=$('playerValue');if(valueInput){valueInput.closest('.attr').classList.toggle('changed',Object.hasOwn(patch,'value'));valueInput.addEventListener('change',()=>{let shown=Number(valueInput.value),value=rawValue(shown);if(valueInput.value===''||!valueInput.validity.valid||!Number.isSafeInteger(shown)||!Number.isSafeInteger(value)||value<1||value>4294967294||value===300000000){notify('Saisis une valeur entière positive dans les limites acceptées par le jeu.',true);renderDetail();return}let cur=changes[p.uid]||{};if(shown===displayValue(p.value))delete cur.value;else cur.value=value;if(Object.keys(cur).length)changes[p.uid]=cur;else delete changes[p.uid];persist();apply()})}
-const profileValue=moneyVal(v.value),profileWage=moneyVal(v.wage),financialFacts=[];if(profileValue!==null)financialFacts.push(`Valeur : ${formatValue(v.value)}`);if(profileWage!==null)financialFacts.push(`Salaire/sem. : ${profileWage.toLocaleString('fr-FR')}`);if(financialFacts.length)$('detail').querySelector('.detail-kpis').insertAdjacentHTML('afterend',`<p class="small-muted">${financialFacts.join(' · ')}</p>`);
+const valueInput=$('playerValue');
+if(valueInput){
+  valueInput.closest('.attr').classList.toggle('changed',Object.hasOwn(patch,'value'));
+  valueInput.addEventListener('change',()=>{
+    const shown=enteredAmount(valueInput.value),value=shown===null?null:rawValue(shown);
+    if(!Number.isSafeInteger(shown)||!Number.isSafeInteger(value)||value<1||value>4294967294||value===300000000){
+      notify('Saisis une valeur entière positive dans les limites acceptées par le jeu.',true);
+      renderDetail();
+      return;
+    }
+    const cur=changes[p.uid]||{};
+    if(shown===displayValue(p.value))delete cur.value;else cur.value=value;
+    if(Object.keys(cur).length)changes[p.uid]=cur;else delete changes[p.uid];
+    persist();apply();
+  });
+}
 $('detail').querySelectorAll('[data-ability]').forEach(el=>el.addEventListener('change',()=>edit(selected,el.dataset.ability,null,el.value)));
 $('detail').querySelectorAll('[data-attr]').forEach(el=>{el.closest('.attr').classList.toggle('changed',Object.hasOwn(changes[p.uid]?.attrs||{},el.dataset.attr));el.addEventListener('change',()=>edit(selected,'attrs',el.dataset.attr,el.value))});
 $('detail').querySelectorAll('[data-role]').forEach(el=>{el.closest('.attr').classList.toggle('changed',Object.hasOwn(changes[p.uid]?.roles||{},el.dataset.role));el.addEventListener('change',()=>edit(selected,'roles',el.dataset.role,el.value))});
@@ -258,15 +391,73 @@ $('detail').querySelectorAll('[data-personality]').forEach(el=>{el.closest('.att
 $('detail').querySelectorAll('[data-position-rating]').forEach(el=>{el.closest('.attr').classList.toggle('changed',Object.hasOwn(changes[p.uid]?.positions_ratings||{},el.dataset.positionRating));el.addEventListener('change',()=>edit(selected,'positions_ratings',el.dataset.positionRating,el.value))});
 $('detail').querySelectorAll('[data-trait]').forEach(el=>el.addEventListener('change',()=>{let key=el.dataset.trait,cur=changes[p.uid]||{};cur.traits={...(cur.traits||{})};if(el.checked===!!p.traits[key])delete cur.traits[key];else cur.traits[key]=el.checked;if(!Object.keys(cur.traits).length)delete cur.traits;if(Object.keys(cur).length)changes[p.uid]=cur;else delete changes[p.uid];persist();apply()}));
 $('detail').querySelectorAll('[data-info]').forEach(el=>el.addEventListener('change',()=>{let key=el.dataset.info,value=Number(el.value),min=Number(el.min),max=Number(el.max);if(el.value===''||!Number.isInteger(value)||value<min||value>max){notify(`Valeur attendue entre ${min} et ${max}.`,true);renderDetail();return}let cur=changes[p.uid]||{};if(value===p[key])delete cur[key];else cur[key]=value;if(Object.keys(cur).length)changes[p.uid]=cur;else delete changes[p.uid];persist();apply()}));
-$('detail').querySelectorAll('.attr-group').forEach(el=>el.addEventListener('toggle',()=>{if(el.open)openAttributeGroups.add(el.dataset.group);else openAttributeGroups.delete(el.dataset.group)}));
-$('fav').addEventListener('click',()=>toggleFav(selected));$('compare').addEventListener('click',()=>{if(compareTo===selected){compareTo=null}else if(compareTo){compareTo=selected}else{compareTo=selected;notify(`Choisis maintenant ${currentMode==='staff'?'un autre membre du staff':'un autre joueur'} dans le tableau pour le comparer.`)}renderDetail()});if($('clearCompare'))$('clearCompare').addEventListener('click',()=>{compareTo=null;renderDetail()})}
+$('detail').querySelectorAll('.attr-group').forEach(el=>el.addEventListener('toggle',()=>{if(!el.isConnected)return;if(el.open)openAttributeGroups.add(el.dataset.group);else openAttributeGroups.delete(el.dataset.group)}));
+$('fav').addEventListener('click',()=>toggleFav(selected));
+$('compare').addEventListener('click',()=>{
+  compareTo=selected;
+  profileDialog.close();
+  notify(`Choisis ${currentMode==='staff'?'un autre membre du staff':'un autre joueur'} dans le tableau pour comparer les fiches.`);
+});
+$('clearCompare')?.addEventListener('click',()=>{compareTo=null;renderDetail();$('compare').focus({preventScroll:true})});
+detail.scrollTop=scrollTop;
+}
 function edit(uid,field,key,value){let n=nval(value),groupField=['attrs','roles','personality','positions_ratings','traits'].includes(field),hi=groupField?20:200;if(n!==null&&n>hi)n=hi;if((groupField||currentMode==='staff')&&n!==null&&n<1)n=1;let original=byId.get(uid),cur=changes[uid]||{};if(groupField){cur[field]={...(cur[field]||{})};if(n===null||n===(original?.[field]||{})[key])delete cur[field][key];else cur[field][key]=n}else if(n===null||n===original?.[field])delete cur[field];else cur[field]=n;for(const group of ['attrs','roles','personality','positions_ratings','traits'])if(!Object.keys(cur[group]||{}).length)delete cur[group];if(Object.keys(cur).length)changes[uid]=cur;else delete changes[uid];persist();apply()}
 function toggleFav(uid){shortlist.has(uid)?shortlist.delete(uid):shortlist.add(uid);persist();apply()}
-$('rows').addEventListener('click',ev=>{let star=ev.target.closest('[data-star]');if(star){toggleFav(star.dataset.star);return}let tr=ev.target.closest('[data-uid]');if(tr){if(compareTo&&compareTo!==tr.dataset.uid){selected=tr.dataset.uid}else{selected=tr.dataset.uid}apply()}});
+$('rows').addEventListener('click',ev=>{
+  const star=ev.target.closest('[data-star]');
+  if(star){toggleFav(star.dataset.star);return}
+  const row=ev.target.closest('[data-uid]');
+  if(!row)return;
+  $('rows').querySelector('.selected')?.classList.remove('selected');
+  selected=row.dataset.uid;
+  row.classList.add('selected');
+  row.querySelector('.profile-trigger').focus({preventScroll:true});
+  const feedback=$('profileFeedback');
+  feedback.classList.remove('info','error');
+  feedback.textContent='';
+  renderDetail();
+  profileDialog.showModal();
+});
+$('closeProfile').addEventListener('click',()=>profileDialog.close());
+profileDialog.addEventListener('click',ev=>{
+  if(ev.target!==profileDialog)return;
+  const bounds=profileDialog.getBoundingClientRect();
+  if(ev.clientX<bounds.left||ev.clientX>bounds.right||ev.clientY<bounds.top||ev.clientY>bounds.bottom)profileDialog.close();
+});
+profileDialog.addEventListener('close',()=>{
+  if(profileDialog.open)return;
+  const row=[...$('rows').children].find(row=>row.dataset.uid===selected);
+  const trigger=row?.querySelector('.profile-trigger')||$('search');
+  trigger.focus({preventScroll:true});
+});
+$('detail').addEventListener('keydown',ev=>{
+  if(ev.key==='Enter'&&ev.target instanceof HTMLInputElement&&ev.target.type!=='checkbox')ev.target.blur();
+});
+$('detailSave').addEventListener('click',()=>$('saveEdits').click());
+$('detailReset').addEventListener('click',()=>{delete changes[selected];persist();apply()});
 $('modePlayers').addEventListener('click',()=>switchMode('players'));
 $('modeStaff').addEventListener('click',()=>{if(staffRecords.length)switchMode('staff')});
-$('currency').addEventListener('change',()=>{const bounds=['valueMin','valueMax'].map(id=>$(id).value===''?null:rawValue(Number($(id).value)));currency=$('currency').value;$('valueCurrency').textContent=`(${valueSymbol()})`;bounds.forEach((v,i)=>{if(v!==null)$(['valueMin','valueMax'][i]).value=displayValue(v)});page=0;apply()});
-['search','nationFilter','positionFilter','ageMin','ageMax','caMin','caMax','paMin','paMax','valueMin','valueMax','wageMin','wageMax','sort','squadFilter'].forEach(id=>$(id).addEventListener(['search','nationFilter'].includes(id)?'input':'change',()=>{page=0;apply()}));
+$('currency').addEventListener('change',()=>{
+  const bounds=valueBounds.map(id=>{
+    const amount=enteredAmount($(id).value);
+    return amount===null?null:rawValue(amount);
+  });
+  currency=$('currency').value;
+  $('valueCurrency').textContent=`(${valueSymbol()})`;
+  bounds.forEach((amount,index)=>{$(valueBounds[index]).value=amount===null?'':formatMoneyNumber(displayValue(amount))});
+  page=0;apply();
+});
+for(const id of amountInputs){
+  const field=$(id);
+  field.addEventListener('change',()=>{
+    const amount=enteredAmount(field.value);
+    if(amount===null&&field.value.trim())notify('Saisis un montant positif ou nul.',true);
+    field.value=amount===null?'':formatMoneyNumber(amount);
+    page=0;apply();
+  });
+  field.addEventListener('keydown',ev=>{if(ev.key==='Enter')field.blur()});
+}
+['search','nationFilter','positionFilter','ageMin','ageMax','caMin','caMax','paMin','paMax','sort','squadFilter'].forEach(id=>$(id).addEventListener(['search','nationFilter'].includes(id)?'input':'change',()=>{page=0;apply()}));
 $('addAttributeFilter').addEventListener('click',()=>{let choice=$('searchAttribute').value,min=searchBound('attributeMin'),max=searchBound('attributeMax');if(!choice||min===null&&max===null){notify('Choisis un attribut et au moins une borne.',true);return}if(min!==null&&(min<1||min>20)||max!==null&&(max<1||max>20)||min!==null&&max!==null&&min>max){notify('Les notes doivent être entre 1 et 20, avec un minimum inférieur au maximum.',true);return}let [kind,key]=choice.split(':'),label=$('searchAttribute').selectedOptions[0].textContent,list=attributeCriteria[currentMode],existing=list.findIndex(rule=>rule.kind===kind&&rule.key===key),rule={kind,key,label,min,max};if(existing>=0)list[existing]=rule;else list.push(rule);renderAttributeCriteria();$('attributeMin').value='';$('attributeMax').value='';page=0;apply()});
 $('genderFilter').addEventListener('change',()=>{populateNavigation();page=0;apply()});
 $('countryFilter').addEventListener('change',()=>{$('leagueFilter').value='';$('clubFilter').value='';$('squadFilter').value='';populateNavigation();page=0;apply()});
@@ -357,9 +548,9 @@ $('localSave').addEventListener('change',()=>{
   $('localPath').textContent=localOpenedPath?$('localSave').value===localOpenedPath?'Fichier à modifier : '+localOpenedPath:'Partie affichée : '+localOpenedPath+' · Ouvre la nouvelle sélection pour la modifier.':'';
 });
 $('saveEdits').addEventListener('click',async()=>{
-  const edits=pendingEdits();if(!localToken||!edits.length)return;
+  const edits=pendingEdits();if(saveInProgress||!localToken||!edits.length||$('localSave').value!==localOpenedPath)return;
   const saveMode=currentMode,saveById=byId,saveChanges=changes;
-  $('saveEdits').disabled=true;$('saveEdits').textContent='Enregistrement en cours…';$('modePlayers').disabled=true;$('modeStaff').disabled=true;$('openLocal').disabled=true;$('localSave').disabled=true;
+  saveInProgress=true;updateSaveButton();$('modePlayers').disabled=true;$('modeStaff').disabled=true;$('openLocal').disabled=true;$('localSave').disabled=true;
   try{
     const endpoint=saveMode==='staff'?'/api/enregistrer-staff':'/api/enregistrer';
     const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:localToken,edits})});
@@ -367,7 +558,7 @@ $('saveEdits').addEventListener('click',async()=>{
     for(const patch of edits){const player=saveById.get(String(patch.uid));if(!player)continue;ensureAttributes(player);if(patch.ca!==undefined)player.ca=patch.ca;if(patch.pa!==undefined)player.pa=patch.pa;if(patch.value!==undefined)player.value=patch.value;if(patch.birth_date!==undefined){player.birth_date=patch.birth_date;player.age=ageFromBirth(patch.birth_date,lastSummary?.game_date)}Object.assign(player.attrs,patch.attrs||{});Object.assign(player.personality,patch.personality||{});Object.assign(player.positions_ratings,patch.positions_ratings||{});Object.assign(player.traits,patch.traits||{});for(const field of ["height","home_rep","current_rep","world_rep"])if(patch[field]!==undefined)player[field]=patch[field];if(player.isStaff)Object.assign(player.roles,patch.roles||{});delete saveChanges[String(patch.uid)]}
     persist();refreshFinancialSearch();apply();notify(`${data.changed} valeur(s) enregistrée(s) dans ${localOpenedPath}. Recharge cette partie dans FM27 pour les voir.`);
   }catch(error){notify(String(error.message||error),true)}
-  finally{$('modePlayers').disabled=false;$('modeStaff').disabled=!staffRecords.length;$('openLocal').disabled=false;$('localSave').disabled=false;updateSaveButton()}
+  finally{saveInProgress=false;$('modePlayers').disabled=false;$('modeStaff').disabled=!staffRecords.length;$('openLocal').disabled=false;$('localSave').disabled=false;updateSaveButton()}
 });
 $('importTop').addEventListener('click',()=>$('file').click());
 $('file').addEventListener('change',e=>receive(e.target.files[0]));$('drop').addEventListener('dragover',e=>{e.preventDefault();$('drop').classList.add('over')});$('drop').addEventListener('dragleave',()=>{$('drop').classList.remove('over')});$('drop').addEventListener('drop',e=>{e.preventDefault();$('drop').classList.remove('over');receive(e.dataTransfer.files[0])});
