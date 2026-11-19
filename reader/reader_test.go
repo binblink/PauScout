@@ -57,8 +57,15 @@ func TestProvidedSample(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if s.GameVersion != "27.0.1+2503222" || s.Manager != "Binbin Carpenter" || s.Club != "Pau FC" {
+	if !SupportsGameVersion(s.GameVersion) || s.Manager != "Binbin Carpenter" || s.Club != "Pau FC" {
 		t.Fatalf("wrong metadata: %+v", s)
+	}
+	knownSummaries := map[int64]struct{ version, date string }{
+		151111254: {"27.0.1+2503222", "2027-08-20"},
+		142185783: {"27.1.0+2505117", "2027-06-06"},
+	}
+	if want, ok := knownSummaries[stat.Size()]; ok && (s.GameVersion != want.version || s.GameDate != want.date) {
+		t.Fatalf("version/date = %s/%s, want %s/%s", s.GameVersion, s.GameDate, want.version, want.date)
 	}
 	if stat.Size() == 140931722 && s.GameDate != "2027-06-04" {
 		t.Fatalf("game date=%q want 2027-06-04", s.GameDate)

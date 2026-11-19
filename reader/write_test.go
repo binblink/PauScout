@@ -4,6 +4,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
 	"testing"
 )
 
@@ -11,6 +12,15 @@ func TestWritePlayerEditsOnCopy(t *testing.T) {
 	source := os.Getenv("FM27_SAMPLE")
 	if source == "" {
 		t.Skip("FM27_SAMPLE non défini")
+	}
+	const briceID uint32 = 34001981
+	playerID := briceID
+	if value := os.Getenv("FM27_SAMPLE_PLAYER_ID"); value != "" {
+		parsed, err := strconv.ParseUint(value, 10, 32)
+		if err != nil || parsed == 0 {
+			t.Fatalf("FM27_SAMPLE_PLAYER_ID invalide : %q", value)
+		}
+		playerID = uint32(parsed)
 	}
 	input, err := os.Open(source)
 	if err != nil {
@@ -32,26 +42,28 @@ func TestWritePlayerEditsOnCopy(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	offsets, err := editedPlayerOffsets(before, []PlayerEdit{{ID: 34001981}})
+	offsets, err := editedPlayerOffsets(before, []PlayerEdit{{ID: playerID}})
 	if err != nil {
 		t.Fatal(err)
 	}
-	loc := offsets[34001981]
+	loc := offsets[playerID]
 	start := loc.start
 	pools, err := locateNamePools(before)
 	if err != nil {
 		t.Fatal(err)
 	}
-	identity, err := findPersonIdentity(before, start+100, loc.closing, pools, 34001981)
+	identity, err := findPersonIdentity(before, start+100, loc.closing, pools, playerID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	for key, expected := range map[string]uint8{
-		"adaptability": 20, "ambition": 12, "controversy": 7, "loyalty": 16,
-		"pressure": 11, "professionalism": 15, "sportsmanship": 15, "temperament": 15,
-	} {
-		if got := personalityValues(identity)[key]; got != expected {
-			t.Fatalf("%s=%d, attendu %d selon la capture de Brice", key, got, expected)
+	if playerID == briceID {
+		for key, expected := range map[string]uint8{
+			"adaptability": 20, "ambition": 12, "controversy": 7, "loyalty": 16,
+			"pressure": 11, "professionalism": 15, "sportsmanship": 15, "temperament": 15,
+		} {
+			if got := personalityValues(identity)[key]; got != expected {
+				t.Fatalf("%s=%d, attendu %d selon la capture de Brice", key, got, expected)
+			}
 		}
 	}
 	newProfessionalism := before[identity.personalityOffset+4] + 1
@@ -79,7 +91,7 @@ func TestWritePlayerEditsOnCopy(t *testing.T) {
 	if newHandling > 20 {
 		newHandling = 19
 	}
-	count, err := WritePlayerEdits(target, []PlayerEdit{{ID: 34001981, CA: &newCA, PA: &newPA, Attrs: map[string]uint8{"handling": newHandling}, Personality: map[string]uint8{"professionalism": newProfessionalism}, Traits: map[int]bool{0: newTrait}, Height: &newHeight, CurrentRep: &newRep, BirthDate: &newBirth, Value: &newValue}})
+	count, err := WritePlayerEdits(target, []PlayerEdit{{ID: playerID, CA: &newCA, PA: &newPA, Attrs: map[string]uint8{"handling": newHandling}, Personality: map[string]uint8{"professionalism": newProfessionalism}, Traits: map[int]bool{0: newTrait}, Height: &newHeight, CurrentRep: &newRep, BirthDate: &newBirth, Value: &newValue}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -119,7 +131,7 @@ func TestWritePlayerEditsOnCopy(t *testing.T) {
 	}
 	found := false
 	for _, player := range catalog.Players {
-		if player.ID == 34001981 {
+		if player.ID == playerID {
 			found = true
 			if player.Value == nil || *player.Value != newValue {
 				t.Fatalf("valeur incorrecte : %v", player.Value)
@@ -127,7 +139,7 @@ func TestWritePlayerEditsOnCopy(t *testing.T) {
 			if player.BirthDate != newBirth {
 				t.Fatalf("date relue=%q, attendue %q", player.BirthDate, newBirth)
 			}
-			if player.Nationality != "France" {
+			if playerID == briceID && player.Nationality != "France" {
 				t.Fatalf("nationalité de Brice=%q, attendue France", player.Nationality)
 			}
 			if player.Personality["professionalism"] != newProfessionalism {

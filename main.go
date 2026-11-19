@@ -28,8 +28,9 @@ import (
 var website embed.FS
 
 const (
-	maxUpload = 800 << 20
-	maxSave   = 1400 << 20
+	appVersion = "0.14.1"
+	maxUpload  = 800 << 20
+	maxSave    = 1400 << 20
 )
 
 var tabCloseDelay = 30 * time.Second
@@ -145,7 +146,7 @@ func (a *api) openLocal(w http.ResponseWriter, r *http.Request) {
 		a.json(w, 422, map[string]string{"error": err.Error()})
 		return
 	}
-	if s.GameVersion != "27.0.1+2503222" {
+	if !reader.SupportsGameVersion(s.GameVersion) {
 		a.json(w, 422, map[string]string{"error": "Version FM27 non validée pour l'écriture : " + s.GameVersion})
 		return
 	}
@@ -332,7 +333,7 @@ func (a *api) upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.File = name
-	if s.GameVersion == "27.0.1+2503222" {
+	if reader.SupportsGameVersion(s.GameVersion) {
 		catalog, catalogErr := reader.ReadPlayerCatalog(savePath)
 		if catalogErr != nil {
 			a.json(w, 422, map[string]string{"error": "Joueurs FM27 illisibles : " + catalogErr.Error()})
@@ -391,7 +392,7 @@ func run() error {
 		_, _ = w.Write(data)
 	})
 	mux.HandleFunc("/api/status", func(w http.ResponseWriter, r *http.Request) {
-		a.json(w, 200, map[string]any{"native": true, "fmsave": true, "ready": true, "version": "0.14", "reader": "FMF/Zstandard en Go", "player_db": "partial", "staff_db": "partial"})
+		a.json(w, 200, map[string]any{"native": true, "fmsave": true, "ready": true, "version": appVersion, "reader": "FMF/Zstandard en Go", "player_db": "partial", "staff_db": "partial"})
 	})
 	mux.HandleFunc("/api/charger", a.upload)
 	mux.HandleFunc("/api/sauvegardes", a.localSaves)
@@ -409,7 +410,7 @@ func run() error {
 	}
 	url := fmt.Sprintf("http://127.0.0.1:%d", listener.Addr().(*net.TCPAddr).Port)
 	a.srv = &http.Server{Handler: mux, ReadHeaderTimeout: 10 * time.Second, IdleTimeout: 60 * time.Second}
-	log.Printf("PauScout FM27 v0.14 : %s", url)
+	log.Printf("PauScout FM27 v%s : %s", appVersion, url)
 	if err := openBrowser(url); err != nil {
 		log.Printf("Ouvre ce lien manuellement : %s (%v)", url, err)
 	}

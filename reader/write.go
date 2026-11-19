@@ -399,7 +399,7 @@ func writeGameDBEdits(path string, mutate func([]byte) (int, error)) (int, error
 	if err != nil {
 		return 0, err
 	}
-	if summary.GameVersion != "27.0.1+2503222" {
+	if !SupportsGameVersion(summary.GameVersion) {
 		return 0, fmt.Errorf("version FM27 non validée : %s", summary.GameVersion)
 	}
 	directory, err := ReadDirectory(path)

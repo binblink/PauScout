@@ -1,11 +1,82 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
+
+	"pauscout.local/app/reader"
 )
+
+func TestSaveCatalogEndpoints(t *testing.T) {
+	path := os.Getenv("FM27_SAMPLE")
+	if path == "" {
+		t.Skip("FM27_SAMPLE non défini")
+	}
+	want, err := reader.Read(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	type catalogSummary struct {
+		Version  string                 `json:"version"`
+		GameDate string                 `json:"game_date"`
+		Coverage reader.CatalogCoverage `json:"coverage"`
+	}
+	check := func(t *testing.T, summary catalogSummary) {
+		t.Helper()
+		if summary.Version != want.GameVersion || summary.GameDate != want.GameDate || summary.Coverage.WithID == 0 {
+			t.Fatalf("catalogue inattendu : %+v", summary)
+		}
+	}
+	a := &api{}
+	t.Run("import", func(t *testing.T) {
+		file, err := os.Open(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer file.Close()
+		request := httptest.NewRequest(http.MethodPost, "/api/charger", file)
+		request.Header.Set("X-File-Name", url.QueryEscape(filepath.Base(path)))
+		response := httptest.NewRecorder()
+		a.upload(response, request)
+		var summary catalogSummary
+		if response.Code != http.StatusOK {
+			t.Fatalf("import HTTP %d : %s", response.Code, response.Body)
+		}
+		if err := json.Unmarshal(response.Body.Bytes(), &summary); err != nil {
+			t.Fatal(err)
+		}
+		check(t, summary)
+	})
+	t.Run("ouverture locale", func(t *testing.T) {
+		body, err := json.Marshal(map[string]string{"path": path})
+		if err != nil {
+			t.Fatal(err)
+		}
+		response := httptest.NewRecorder()
+		a.openLocal(response, httptest.NewRequest(http.MethodPost, "/api/ouvrir-local", bytes.NewReader(body)))
+		if response.Code != http.StatusOK {
+			t.Fatalf("ouverture locale HTTP %d : %s", response.Code, response.Body)
+		}
+		var result struct {
+			Summary catalogSummary `json:"summary"`
+			Token   string         `json:"token"`
+		}
+		if err := json.Unmarshal(response.Body.Bytes(), &result); err != nil {
+			t.Fatal(err)
+		}
+		check(t, result.Summary)
+		if result.Token == "" {
+			t.Fatal("session d'édition absente")
+		}
+	})
+}
 
 func TestTabLifecycleReloadAndLastTab(t *testing.T) {
 	old := tabCloseDelay

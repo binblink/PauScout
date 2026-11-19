@@ -26,6 +26,17 @@ const (
 
 var versionRE = regexp.MustCompile(`\b(?:26|27)\.\d+\.\d+\+\d+\b`)
 
+// SupportsGameVersion reports whether the build is supported for catalog
+// decoding and save editing. Read can also recognize other builds' metadata.
+func SupportsGameVersion(version string) bool {
+	switch version {
+	case "27.0.1+2503222", "27.1.0+2505117":
+		return true
+	default:
+		return false
+	}
+}
+
 type Frame struct {
 	Offset       int64 `json:"-"`
 	Compressed   int64 `json:"compressed"`
