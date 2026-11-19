@@ -92,7 +92,7 @@ body:has(.profile-dialog[open]){overflow:hidden}
     <div class="field"><button id="exportEdits" class="btn">Exporter les modifications</button></div>
     <div class="note">La sélection et les modifications en attente restent dans ce navigateur. Le bouton Enregistrer les stats écrit dans la partie locale ouverte.</div>
   </section>
-  <div class="side-footer">PAUSCOUT v0.14.2 · Édition locale des joueurs et du staff · Non affilié à SEGA ou Sports Interactive.</div>
+  <div class="side-footer">PAUSCOUT v0.14.3 · Édition locale des joueurs et du staff · Non affilié à SEGA ou Sports Interactive.</div>
 </aside>
 <main class="main">
   <div class="topline"><div><div class="micro">FOOTBALL MANAGER 2027 / JOUEURS</div><h1 class="title">Explore et modifie <b>ta partie.</b></h1><p class="subtitle">Parcours les clubs, consulte les joueurs et enregistre leurs stats dans ta sauvegarde locale.</p></div><div class="top-actions"><div id="status" class="live">● Local et privé</div><button id="importTop" type="button" class="btn btn-primary">⇧ Importer pour consulter</button><button id="quit" class="btn btn-outline" style="padding:6px 10px">Quitter</button></div></div>
@@ -143,6 +143,24 @@ const nval=v=>v===null||v===undefined||v===''||!Number.isFinite(Number(v))?null:
 function moneyVal(raw){if(raw===null||raw===undefined||raw==='')return null;if(typeof raw==='number')return Number.isFinite(raw)?raw:null;let s=String(raw).toLowerCase().replace(/[\s€£$]/g,'').replace(/(?:p\/w|\/week|\/sem(?:aine)?)$/,'');s=s.replace(/[,\.](?=\d{3}(?:\D|$))/g,'').replace(',','.');let m=s.match(/^(\d+(?:\.\d+)?)([kmb])?$/);return m?Number(m[1])*({k:1000,m:1000000,b:1000000000}[m[2]]||1):null}
 const show=v=>(v===null||v===undefined||v==='')?'—':es(v);
 const storeGet=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
+const profileFields=new Set([
+  'uid','name','name_known','birth_date','age','nation','gender','sex','sexe','is_woman',
+  'club','club_id','clubid','country','pays','league','ligue','team_id','teamid','team_slot','teamslot','squad',
+  'position','positions_ratings','job','ca','pa','value','wage','height','home_rep','current_rep','world_rep',
+  'attrs','attrs_b64','personality','traits','traits_known','roles','roles_b64'
+]);
+function loadChanges(key){
+  const drafts=storeGet(key,{});
+  for(const [uid,patch] of Object.entries(drafts)){
+    if(!patch?.attrs)continue;
+    for(const attribute of Object.keys(patch.attrs)){
+      if(profileFields.has(canonical(attribute)))delete patch.attrs[attribute];
+    }
+    if(!Object.keys(patch.attrs).length)delete patch.attrs;
+    if(!Object.keys(patch).length)delete drafts[uid];
+  }
+  return drafts;
+}
 let players=[],playerRecords=[],staffRecords=[],filtered=[],byId=new Map(),selected=null,compareTo=null,page=0,onlyFav=false,fmAttributeOrder=[],staffAttributeOrder=[],staffRoleOrder=[],localToken='',localOpenedPath='',currentMode='players';
 let euroRate=null, fmCurrency=false, currency='GBP';
 let saveInProgress=false;
@@ -165,9 +183,20 @@ function formatValue(raw,original=raw){return formatAmount(displayValue(raw),val
 function formatWage(raw){return formatAmount(moneyVal(raw),sourceSymbol(raw))}
 function configureCurrency(rate,isFM){fmCurrency=isFM;euroRate=Number.isFinite(Number(rate))&&Number(rate)>0?Number(rate):null;currency=fmCurrency&&euroRate?'EUR':'GBP';$('currency').value=currency;$('currency').disabled=!fmCurrency;$('currency').querySelector('[value="EUR"]').disabled=!fmCurrency||!euroRate;$('valueCurrency').textContent=valueSymbol()?`(${valueSymbol()})`:''}
 let playerShortlist=new Set(storeGet('pauscout.shortlist',[])),staffShortlist=new Set(storeGet('pauscout.staffShortlist',[])),shortlist=playerShortlist;
-let playerChanges=storeGet('pauscout.changes',{}),staffChanges=storeGet('pauscout.staffChanges',{}),changes=playerChanges;
+let playerChanges=loadChanges('pauscout.changes'),staffChanges=loadChanges('pauscout.staffChanges'),changes=playerChanges;
 let attributeCriteria={players:[],staff:[]};
 const pageSize=100;
+const positionLabels={
+  GK:'Gardien de but',SW:'Libéro',DL:'Défenseur latéral gauche',DC:'Défenseur central',DR:'Défenseur latéral droit',
+  DM:'Milieu défensif',ML:'Milieu gauche',MC:'Milieu central',MR:'Milieu droit',
+  AML:'Milieu offensif gauche',AMC:'Milieu offensif central',AMR:'Milieu offensif droit',
+  STC:'Avant-centre',WBL:'Piston gauche',WBR:'Piston droit'
+};
+const positionAliases={GB:'GK',LIB:'SW',DG:'DL',DD:'DR',MD:'DM',MG:'ML',MOG:'AML',MOC:'AMC',MOD:'AMR',BU:'STC',PIG:'WBL',PID:'WBR'};
+function positionLabel(value){
+  const label=value.trim(),code=label.toUpperCase();
+  return positionLabels[positionAliases[code]||code]||label;
+}
 const attributeLabels={
   crossing:'Centres',dribbling:'Dribbles',finishing:'Finition',heading:'Jeu de tête',long_shots:'Tirs de loin',marking:'Marquage',off_the_ball:'Appels de balle',passing:'Passes',penalty_taking:'Penalties',tackling:'Tacles',vision:'Vision du jeu',handling:'Prise de balle',aerial_reach:'Détente aérienne',command_of_area:'Autorité dans la surface',communication:'Communication',kicking:'Dégagements',throwing:'Relances à la main',anticipation:'Anticipation',decisions:'Décisions',one_on_ones:'Un contre un',positioning:'Placement',reflexes:'Réflexes',first_touch:'Contrôle de balle',technique:'Technique',flair:'Inspiration',corners:'Corners',teamwork:'Collectif',work_rate:'Volume de jeu',long_throws:'Touches longues',eccentricity:'Excentricité',rushing_out:'Sorties',punching:'Dégagements au poing',acceleration:'Accélération',free_kick_taking:'Coups francs',strength:'Force',stamina:'Endurance',pace:'Vitesse',jumping_reach:'Détente verticale',leadership:'Autorité',dirtiness:'Vice',balance:'Équilibre',bravery:'Courage',consistency:'Régularité',aggression:'Agressivité',agility:'Agilité',important_matches:'Grands matchs',injury_proneness:'Fragilité',versatility:'Polyvalence',natural_fitness:'Condition naturelle',determination:'Détermination',composure:'Sang-froid',concentration:'Concentration'
 };
@@ -225,8 +254,42 @@ function effective(p){let c=changes[p.uid];return c?{...p,ca:c.ca??p.ca,pa:c.pa?
 function ensureAttributes(p){if(!p)return;let order=p.isStaff?staffAttributeOrder:fmAttributeOrder;if(p.attrsBase64){let raw=atob(p.attrsBase64);if(raw.length===order.length){for(let i=0;i<raw.length;i++){let value=raw.charCodeAt(i);if(value>=1&&value<=20)p.attrs[order[i]]=value}p.attrsBase64=''}}if(p.isStaff&&p.rolesBase64){let raw=atob(p.rolesBase64);if(raw.length===staffRoleOrder.length){for(let i=0;i<raw.length;i++){let value=raw.charCodeAt(i);if(value>=1&&value<=20)p.roles[staffRoleOrder[i]]=value}p.rolesBase64=''}}}
 function canonical(k){let m=norm(k).replace(/[\s.\-]+/g,'_');return ({'nom':'name','joueur':'name','player':'name','player_name':'name','age':'age','âge':'age','club_name':'club','team':'club','equipe':'club','équipe':'club','nationalite':'nation','nationality':'nation','poste':'position','positions':'position','pos':'position','current_ability':'ca','capacite_actuelle':'ca','ca':'ca','potential_ability':'pa','potentiel':'pa','pa':'pa','unique_id':'uid','player_id':'uid','id':'uid','value':'value','valeur':'value','transfer_value':'value','market_value':'value','salaire':'wage','salary':'wage','weekly_wage':'wage','contract_wage':'wage'})[m]||m}
 function genderValue(flat){let raw=flat.gender??flat.sexe??flat.sex;if(raw===undefined&&typeof flat.is_woman==='boolean')return flat.is_woman?'female':'male';let value=norm(raw);if(['male','m','homme','masculin','man','men'].includes(value))return 'male';if(['female','f','femme','feminin','woman','women'].includes(value))return 'female';return ''}
-function mapPlayer(rec,i){let flat=rec&&typeof rec==='object'?rec:{};let club=String(flat.club??flat.club_name??'');let out={uid:String(flat.uid??flat.id??i),name:String(flat.name??flat.nom??flat.player_name??'Joueur '+(i+1)),age:nval(flat.age),birth_date:flat.birth_date||'',club,clubId:String(flat.club_id??club),country:String(flat.country??flat.pays??''),league:String(flat.league??flat.ligue??''),teamId:String(flat.team_id??''),teamSlot:flat.team_slot===undefined||flat.team_slot===null?null:Number(flat.team_slot),squad:String(flat.squad??flat.equipe??''),nation:String(flat.nation??flat.nationality??''),position:String(flat.position??flat.positions??''),gender:genderValue(flat),ca:nval(flat.ca??flat.current_ability),pa:nval((flat.pa??flat.potential_ability)>=0?(flat.pa??flat.potential_ability):null),value:flat.value??flat.transfer_value??flat.market_value??'',wage:flat.wage??flat.salary??flat.weekly_wage??flat.contract_wage??'',attrs:{},attrsBase64:typeof flat.attrs_b64==='string'?flat.attrs_b64:'',personality:{},positions_ratings:flat.positions_ratings||{},traits_known:!!flat.traits_known,traits:Object.fromEntries((flat.traits||[]).map(bit=>[bit,true])),height:flat.height??null,home_rep:flat.home_rep??null,current_rep:flat.current_rep??null,world_rep:flat.world_rep??null};if(typeof flat.attrs==='object'&&flat.attrs){for(let [k,v] of Object.entries(flat.attrs)){let n=nval(v);if(n!==null&&n<=20)out.attrs[k]=n}};if(typeof flat.personality==='object'&&flat.personality)out.personality=flat.personality;for(let[k,v]of Object.entries(flat)){let c=canonical(k),n=nval(v);if(!['age','ca','pa','uid','name','club','club_id','country','pays','league','ligue','team_id','team_slot','squad','equipe','nation','position','value','wage','gender','sex','sexe','is_woman'].includes(c)&&n!==null&&n>=1&&n<=20&&typeof v!=='object')out.attrs[c]=n}
-return out}
+function importedRating(value){
+  if(typeof value!=='number'&&typeof value!=='string')return null;
+  const rating=nval(value);
+  return rating!==null&&rating<=20?rating:null;
+}
+function mapPlayer(rec,i){
+  const flat=rec&&typeof rec==='object'?rec:{};
+  const club=String(flat.club??flat.club_name??'');
+  const out={
+    uid:String(flat.uid??flat.id??i),name:String(flat.name??flat.nom??flat.player_name??'Joueur '+(i+1)),
+    age:nval(flat.age),birth_date:flat.birth_date||'',gender:genderValue(flat),nation:String(flat.nation??flat.nationality??''),
+    club,clubId:String(flat.club_id??club),country:String(flat.country??flat.pays??''),league:String(flat.league??flat.ligue??''),
+    teamId:String(flat.team_id??''),teamSlot:flat.team_slot==null?null:Number(flat.team_slot),squad:String(flat.squad??flat.equipe??''),
+    position:String(flat.position??flat.positions??''),positions_ratings:flat.positions_ratings||{},
+    ca:nval(flat.ca??flat.current_ability),pa:nval((flat.pa??flat.potential_ability)>=0?(flat.pa??flat.potential_ability):null),
+    value:flat.value??flat.transfer_value??flat.market_value??'',wage:flat.wage??flat.salary??flat.weekly_wage??flat.contract_wage??'',
+    attrs:{},attrsBase64:typeof flat.attrs_b64==='string'?flat.attrs_b64:'',
+    personality:flat.personality&&typeof flat.personality==='object'?flat.personality:{},
+    traits_known:[true,1,'1','true'].includes(flat.traits_known),
+    traits:Object.fromEntries((Array.isArray(flat.traits)?flat.traits:[]).map(bit=>[bit,true])),
+    height:flat.height??null,home_rep:flat.home_rep??null,current_rep:flat.current_rep??null,world_rep:flat.world_rep??null
+  };
+  if(flat.attrs&&typeof flat.attrs==='object'){
+    for(const [key,value] of Object.entries(flat.attrs)){
+      const rating=importedRating(value);
+      if(rating!==null&&!profileFields.has(canonical(key)))out.attrs[key]=rating;
+    }
+  }
+  for(const [key,value] of Object.entries(flat)){
+    const rating=importedRating(value);
+    if(rating===null||rating<1)continue;
+    const attribute=canonical(key);
+    if(!profileFields.has(attribute))out.attrs[attribute]=rating;
+  }
+  return out;
+}
 function mapStaff(rec,i){let out=mapPlayer({...rec,position:rec.job||'',nation:rec.nationality||''},i);out.isStaff=true;out.roles=rec.roles&&typeof rec.roles==='object'?rec.roles:{};out.rolesBase64=typeof rec.roles_b64==='string'?rec.roles_b64:'';return out}
 const unknownKey='__non_identifie__';
 const countryKey=p=>p.country||unknownKey,leagueKey=p=>p.league||unknownKey,teamKey=p=>p.teamId||p.squad||unknownKey;
@@ -333,12 +396,14 @@ const traitLabels=['Déborde à gauche','Déborde à droite','Percute dans l’a
 const hasInfo=!!p.birth_date||(!p.isStaff&&p.height!==null);
 const playerInfoHTML=hasInfo?`<details class="attr-group" data-group="infos" ${openAttributeGroups.has('infos')?'open':''}><summary>Informations personnelles</summary><div class="attr-grid">${p.birth_date?`<div class="attr birth-field"><label for="birthDate">Date de naissance</label><input id="birthDate" type="date" min="1901-01-01" max="${es(lastSummary?.game_date||'2200-12-31')}" value="${es(v.birth_date)}"></div>`:''}${!p.isStaff&&p.height!==null?[['height','Taille (cm)',100,230],['current_rep','Réputation actuelle',0,10000],['home_rep','Réputation nationale',0,10000],['world_rep','Réputation mondiale',0,10000]].map(([key,label,min,max])=>`<div class="attr"><label>${label}</label><input data-info="${key}" type="number" min="${min}" max="${max}" value="${v[key]}"></div>`).join(''):''}</div><p class="small-muted" style="padding:0 10px">Nationalité : ${es(p.nation||'inconnue')}</p></details>`:'';
 const traitsHTML=!p.isStaff&&p.traits_known?`<details class="attr-group" data-group="traits" ${openAttributeGroups.has('traits')?'open':''}><summary>Traits du joueur</summary><div class="attr-grid">${traitLabels.map((label,i)=>label?`<label class="attr"><span>${es(label)}</span><input type="checkbox" data-trait="${i}" ${v.traits[i]?'checked':''}></label>`:'').join('')}</div></details>`:'';
-const positionsHTML=!p.isStaff&&Object.keys(v.positions_ratings||{}).length?`<details class="attr-group" data-group="positions" ${openAttributeGroups.has('positions')?'open':''}><summary>Positions</summary><div class="attr-grid">${Object.entries(v.positions_ratings).map(([key,value])=>`<div class="attr"><label>${es(key)}</label><input aria-label="Position ${es(key)}" data-position-rating="${es(key)}" type="number" min="1" max="20" value="${value}"></div>`).join('')}</div></details>`:'';
+const positionsHTML=!p.isStaff&&Object.keys(v.positions_ratings||{}).length?`<details class="attr-group" data-group="positions" ${openAttributeGroups.has('positions')?'open':''}><summary>Positions</summary><div class="attr-grid">${Object.entries(v.positions_ratings).map(([key,value])=>`
+  <div class="attr"><label for="position-rating-${es(key)}">${es(positionLabel(key))}</label><input id="position-rating-${es(key)}" data-position-rating="${es(key)}" type="number" min="1" max="20" value="${es(value)}"></div>`).join('')}</div></details>`:'';
 const personalityHTML=visiblePersonality.length?`<details class="attr-group" data-group="personnalite" ${openAttributeGroups.has('personnalite')?'open':''}><summary>Personnalité<span class="group-count">${visiblePersonality.length}</span></summary><div class="attr-grid">${visiblePersonality.map(key=>{const label=personalityLabels[key],diff=c?((effective(c).personality||{})[key]??null):null;return `<div class="attr"><label for="personality-${es(key)}">${es(label)}${diff!==null?` <span class="small-muted">/ ${diff}</span>`:''}</label><input id="personality-${es(key)}" aria-label="${es(label)}" data-personality="${es(key)}" type="number" min="1" max="20" value="${v.personality[key]}"/></div>`}).join('')}</div></details>`:'';
 const roleHTML=roleKeys.length?`<details class="attr-group" data-group="postes" ${openAttributeGroups.has('postes')?'open':''}><summary>Aptitudes aux postes<span class="group-count">${roleKeys.length}</span></summary><div class="attr-grid">${roleKeys.map(key=>{const label=staffRoleLabels[key]||key.replaceAll('_',' '),diff=c?((effective(c).roles||{})[key]??null):null;return `<div class="attr"><label for="role-${es(key)}">${es(label)}${diff!==null?` <span class="small-muted">/ ${diff}</span>`:''}</label><input id="role-${es(key)}" aria-label="${es(label)}" data-role="${es(key)}" type="number" min="1" max="20" value="${v.roles[key]}"/></div>`}).join('')}</div></details>`:'';
 $('profileAvatar').textContent=v.name.slice(0,1).toUpperCase();
 $('profileName').textContent=v.name;
-$('profileMetadata').textContent=[v.position||'Poste non renseigné',v.club||'Club inconnu',v.squad,v.gender&&(v.gender==='female'?'Femme':'Homme')].filter(Boolean).join(' · ');
+const position=v.isStaff?v.position:v.position.split(',').map(positionLabel).join(', ');
+$('profileMetadata').textContent=[position||'Poste non renseigné',v.club||'Club inconnu',v.squad,v.gender&&(v.gender==='female'?'Femme':'Homme')].filter(Boolean).join(' · ');
 const profileValue=displayValue(v.value),profileWage=moneyVal(v.wage),financialFacts=[];
 if(profileValue!==null)financialFacts.push(`<div><dt>Valeur</dt><dd>${formatValue(v.value,p.value)}</dd></div>`);
 if(profileWage!==null)financialFacts.push(`<div><dt>Salaire hebdomadaire</dt><dd>${formatWage(v.wage)}</dd></div>`);
